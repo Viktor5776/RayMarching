@@ -1,0 +1,88 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Framework">
+      <UniqueIdentifier>{a47d0a3f-5e87-40b2-a18b-a7d2a9dc2509}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Application">
+      <UniqueIdentifier>{6ab86e19-5bd9-4284-b020-68f8d355e9cf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Framework\Header Files">
+      <UniqueIdentifier>{d1fdc1a9-fb38-4b3e-941d-475e0536a811}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Application\Header Files">
+      <UniqueIdentifier>{a68823ac-e51f-404f-b84b-b38b572dceea}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Framework\Source Files">
+      <UniqueIdentifier>{e805e76a-958a-487c-8d8d-e1b6a6b1ec2a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Application\Source Files">
+      <UniqueIdentifier>{8b6c3682-cb18-44f4-8a20-d967ae15fb9d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Imgui">
+      <UniqueIdentifier>{3bd17815-2c89-4f63-acc7-d133473dd2e2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Utility">
+      <UniqueIdentifier>{520ce103-f346-4cd3-b49d-d858185eb71d}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Src\App\App.cpp" />
+    <ClCompile Include="Src\ImGui\imgui.cpp" />
+    <ClCompile Include="Src\ImGui\imgui_demo.cpp" />
+    <ClCompile Include="Src\ImGui\imgui_draw.cpp" />
+    <ClCompile Include="Src\ImGui\imgui_impl_dx11.cpp" />
+    <ClCompile Include="Src\ImGui\imgui_impl_win32.cpp" />
+    <ClCompile Include="Src\ImGui\imgui_tables.cpp" />
+    <ClCompile Include="Src\ImGui\imgui_widgets.cpp" />
+    <ClCompile Include="Src\Utils\Quaternion.cpp" />
+    <ClCompile Include="Src\Utils\Random.cpp" />
+    <ClCompile Include="Src\Win\Graphics.cpp" />
+    <ClCompile Include="Src\Win\Keyboard.cpp" />
+    <ClCompile Include="Src\Win\Mouse.cpp" />
+    <ClCompile Include="Src\Win\Window.cpp" />
+    <ClCompile Include="Src\Win\WinMain.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Src\App\App.h" />
+    <ClInclude Include="Src\ImGui\imconfig.h" />
+    <ClInclude Include="Src\ImGui\imgui.h" />
+    <ClInclude Include="Src\ImGui\imgui_impl_dx11.h" />
+    <ClInclude Include="Src\ImGui\imgui_impl_win32.h" />
+    <ClInclude Include="Src\ImGui\imgui_internal.h" />
+    <ClInclude Include="Src\ImGui\imstb_rectpack.h" />
+    <ClInclude Include="Src\ImGui\imstb_textedit.h" />
+    <ClInclude Include="Src\ImGui\imstb_truetype.h" />
+    <ClInclude Include="Src\Utils\HydroTimer.h" />
+    <ClInclude Include="Src\Utils\Matrix.h" />
+    <ClInclude Include="Src\Utils\Quaternion.h" />
+    <ClInclude Include="Src\Utils\Random.h" />
+    <ClInclude Include="Src\Utils\Vec2.h" />
+    <ClInclude Include="Src\Utils\Vec3.h" />
+    <ClInclude Include="Src\Utils\Vec4.h" />
+    <ClInclude Include="Src\Win\Color.h" />
+    <ClInclude Include="Src\Win\Graphics.h" />
+    <ClInclude Include="Src\Win\Image.h" />
+    <ClInclude Include="Src\Win\Keyboard.h" />
+    <ClInclude Include="Src\Win\Mouse.h" />
+    <ClInclude Include="Src\Win\Window.h" />
+    <ClInclude Include="Src\Win\Resource\resource.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="imgui.ini" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Src\Win\Resource\Application.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Src\Win\Resource\HydroDirectX.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+  </ItemGroup>
+</Project>
