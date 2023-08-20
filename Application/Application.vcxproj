@@ -132,6 +132,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Src\App\App.cpp" />
+    <ClCompile Include="Src\App\Camera.cpp" />
+    <ClCompile Include="Src\App\Renderer.cpp" />
     <ClCompile Include="Src\ImGui\imgui.cpp" />
     <ClCompile Include="Src\ImGui\imgui_demo.cpp" />
     <ClCompile Include="Src\ImGui\imgui_draw.cpp" />
@@ -148,6 +150,9 @@
     <ClCompile Include="Src\Win\WinMain.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Src\App\Camera.h" />
+    <ClInclude Include="Src\App\Ray.h" />
+    <ClInclude Include="Src\App\Renderer.h" />
     <ClInclude Include="Src\Win\Resource\resource.h" />
     <ClInclude Include="Src\App\App.h" />
     <ClInclude Include="Src\ImGui\imconfig.h" />

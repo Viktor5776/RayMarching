@@ -46,6 +46,8 @@
     <ClCompile Include="Src\Win\Mouse.cpp" />
     <ClCompile Include="Src\Win\Window.cpp" />
     <ClCompile Include="Src\Win\WinMain.cpp" />
+    <ClCompile Include="Src\App\Renderer.cpp" />
+    <ClCompile Include="Src\App\Camera.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\App\App.h" />
@@ -71,6 +73,9 @@
     <ClInclude Include="Src\Win\Mouse.h" />
     <ClInclude Include="Src\Win\Window.h" />
     <ClInclude Include="Src\Win\Resource\resource.h" />
+    <ClInclude Include="Src\App\Renderer.h" />
+    <ClInclude Include="Src\App\Camera.h" />
+    <ClInclude Include="Src\App\Ray.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="imgui.ini" />

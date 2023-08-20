@@ -2,7 +2,8 @@
 #include "../Win/Window.h"
 #include "../Utils/HydroTimer.h"
 #include "../Win/Image.h"
-#include <memory>
+#include "Renderer.h"
+#include "Camera.h"
 
 namespace Hydro
 {
@@ -20,11 +21,10 @@ namespace Hydro
 	private:
 		Timer dt;
 		Window wnd;
+		Renderer renderer;
+		Camera camera;
 		uint32_t ViewportWidth = 0, ViewportHeight = 0;
 		
-		Image image;
-		uint32_t* ImageData = nullptr;
-
 		float lastRenderTime = 0.0f;
 	};
 }

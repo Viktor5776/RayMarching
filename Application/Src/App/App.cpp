@@ -8,7 +8,8 @@ namespace Hydro
     App::App()
         :
         wnd( 1280, 720, L"Hydro Base" ),
-        image( ViewportWidth, ViewportHeight, nullptr, wnd.Gfx() )
+        renderer( wnd.Gfx() ),
+        camera( 90.0f, 0.1f, 100.0f )
 	{
 	}
 
@@ -18,6 +19,7 @@ namespace Hydro
     void App::Update()
     {
         float deltaTime = dt.Mark();
+        camera.OnUpdate( wnd, deltaTime );
     }
 
     void App::Frame()
@@ -47,6 +49,7 @@ namespace Hydro
         ViewportWidth = (uint32_t)ImGui::GetContentRegionAvail().x;
         ViewportHeight = (uint32_t)ImGui::GetContentRegionAvail().y;
 
+        auto image = renderer.GetFinalImage();
         if( image.Active() )
         {
             ImGui::Image( image.GetData(), { (float)image.GetWidth(),(float)image.GetHeight() },
@@ -63,19 +66,9 @@ namespace Hydro
     {
         Timer timer;
 
-        if( !image.Active() || image.GetWidth() != ViewportWidth || image.GetHeight() != ViewportHeight )
-        {
-            image = Image( ViewportWidth, ViewportHeight, nullptr, wnd.Gfx() );
-            delete[] ImageData;
-            ImageData = new uint32_t[ViewportWidth * ViewportHeight];
-        }
-
-        for( uint32_t i = 0; i < ViewportHeight * ViewportWidth; i++ )
-        {
-            ImageData[i] = 0xffff0000;
-        }
-
-        image.SetData( ImageData );
+        renderer.OnResize( ViewportWidth, ViewportHeight );
+        camera.OnResize( ViewportWidth, ViewportHeight );
+        renderer.Render( camera );
 
         lastRenderTime = timer.Mark();
     }
