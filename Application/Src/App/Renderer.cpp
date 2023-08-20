@@ -51,6 +51,7 @@ void Renderer::OnResize( int width, int height )
 Vec4F Renderer::PerPixel( Vec2F coord )
 {
     const Vec3F sphereOrigin{ 0,0,0 };
+    const Vec3F boxSize{ 1,1,1 };
     const float radius = 1.0f;
 
     const int maxIterations = 100;
@@ -63,7 +64,7 @@ Vec4F Renderer::PerPixel( Vec2F coord )
 
     for( size_t i = 0; i < maxIterations; i++ )
 	{
-		float distance = signedDistanceSphere( ray.Origin, sphereOrigin, radius );
+        float distance = signedDistanceBox( ray.Origin, sphereOrigin, boxSize );
 		if( distance < surfaceDistance )
 		{
 			return Vec4F( 1.0f, 0.0f, 0.0f, 1.0f );

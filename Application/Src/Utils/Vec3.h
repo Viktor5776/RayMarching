@@ -187,6 +187,35 @@ namespace Hydro
 			return src;
 		}
 
+		static Vec3T<T> Abs( Vec3T<T> lhs )
+		{
+			Vec3T<T> result;
+
+			result.x = abs( lhs.x );
+			result.y = abs( lhs.y );
+			result.z = abs( lhs.z );
+
+			return result;
+		}
+	
+		static Vec3T<T> Max( Vec3T<T> lhs, Vec3T<T> rhs )
+		{
+			lhs.x = (lhs.x > rhs.x) ? lhs.x : rhs.x;
+			lhs.y = (lhs.y > rhs.y) ? lhs.y : rhs.y;
+			lhs.z = (lhs.z > rhs.z) ? lhs.z : rhs.z;
+
+			return lhs;
+		}
+
+		static Vec3T<T> Min( Vec3T<T> lhs, Vec3T<T> rhs )
+		{
+			lhs.x = (lhs.x > rhs.x) ? rhs.x : lhs.x;
+			lhs.y = (lhs.y > rhs.y) ? rhs.y : lhs.y;
+			lhs.z = (lhs.z > rhs.z) ? rhs.z : lhs.z;
+
+			return lhs;
+		}
+
 		static Vec3T<T> Reflect( Vec3T<T> inDirection, Vec3T<T> inNormal )
 		{
 			return inDirection - inNormal * Dot( inDirection, inNormal ) * 2;
