@@ -48,6 +48,7 @@
     <ClCompile Include="Src\Win\WinMain.cpp" />
     <ClCompile Include="Src\App\Renderer.cpp" />
     <ClCompile Include="Src\App\Camera.cpp" />
+    <ClCompile Include="Src\App\Scene.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\App\App.h" />
@@ -76,6 +77,7 @@
     <ClInclude Include="Src\App\Renderer.h" />
     <ClInclude Include="Src\App\Camera.h" />
     <ClInclude Include="Src\App\Ray.h" />
+    <ClInclude Include="Src\App\Scene.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="imgui.ini" />

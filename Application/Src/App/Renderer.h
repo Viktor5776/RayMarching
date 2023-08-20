@@ -3,6 +3,7 @@
 #include "../Utils/Vec4.h"
 #include "Ray.h"
 #include "Camera.h"
+#include "Scene.h"
 
 using namespace Hydro;
 

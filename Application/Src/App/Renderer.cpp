@@ -50,11 +50,32 @@ void Renderer::OnResize( int width, int height )
 
 Vec4F Renderer::PerPixel( Vec2F coord )
 {
+    const Vec3F sphereOrigin{ 0,0,0 };
+    const float radius = 1.0f;
+
+    const int maxIterations = 100;
+    const float surfaceDistance = 0.01f;
+    const float maxDistance = 100.0f;
+
     Ray ray = Ray{ .Origin = activeCamera->GetPosition(),
         .Direction = activeCamera->GetRayDirections()[int( (int)coord.y * finalImage.GetWidth() + (int)coord.x )]
     };
 
-    
+    for( size_t i = 0; i < maxIterations; i++ )
+	{
+		float distance = signedDistanceSphere( ray.Origin, sphereOrigin, radius );
+		if( distance < surfaceDistance )
+		{
+			return Vec4F( 1.0f, 0.0f, 0.0f, 1.0f );
+		}
 
-    return Vec4F( ray.Direction, 1.0f );
+		if( distance > maxDistance )
+		{
+			break;
+		}
+
+		ray.Origin += ray.Direction * distance;
+	} 
+
+    return Vec4F( 0.2f, 0.4f, 1.0f, 1.0f );
 }
