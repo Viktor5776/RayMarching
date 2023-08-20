@@ -7,7 +7,8 @@ namespace Hydro
 {
     App::App()
         :
-        wnd( 1280, 720, L"Hydro Base" )
+        wnd( 1280, 720, L"Hydro Base" ),
+        image( ViewportWidth, ViewportHeight, nullptr, wnd.Gfx() )
 	{
 	}
 
@@ -25,8 +26,59 @@ namespace Hydro
 		
 		RenderImGuiBaseGUI();
 
+        ImGui::Begin( "Settings" );
+        ImGui::Text( "Last render time: %.3fms", lastRenderTime * 1000 );
+        if( ImGui::Button( "Render" ) )
+        {
+            Render();
+        }
+        static bool render = true;
+        ImGui::Checkbox( "Live Render", &render );
+        if( render )
+        {
+            Render();
+        }
+        ImGui::End();
+
+        //Render
+        ImGui::PushStyleVar( ImGuiStyleVar_WindowPadding, ImVec2( 0, 0 ) );
+        ImGui::Begin( "Viewport" );
+		
+        ViewportWidth = (uint32_t)ImGui::GetContentRegionAvail().x;
+        ViewportHeight = (uint32_t)ImGui::GetContentRegionAvail().y;
+
+        if( image.Active() )
+        {
+            ImGui::Image( image.GetData(), { (float)image.GetWidth(),(float)image.GetHeight() },
+                ImVec2( 0, 1 ), ImVec2( 1, 0 ) );
+        }
+
+        ImGui::End();
+        ImGui::PopStyleVar();
+
         wnd.Gfx().EndFrame();
 	}
+
+    void App::Render()
+    {
+        Timer timer;
+
+        if( !image.Active() || image.GetWidth() != ViewportWidth || image.GetHeight() != ViewportHeight )
+        {
+            image = Image( ViewportWidth, ViewportHeight, nullptr, wnd.Gfx() );
+            delete[] ImageData;
+            ImageData = new uint32_t[ViewportWidth * ViewportHeight];
+        }
+
+        for( uint32_t i = 0; i < ViewportHeight * ViewportWidth; i++ )
+        {
+            ImageData[i] = 0xffff0000;
+        }
+
+        image.SetData( ImageData );
+
+        lastRenderTime = timer.Mark();
+    }
 
 	void App::RenderImGuiBaseGUI()
 	{
