@@ -50,10 +50,6 @@ void Renderer::OnResize( int width, int height )
 
 Vec4F Renderer::PerPixel( Vec2F coord )
 {
-    const Vec3F sphereOrigin{ 0,0,0 };
-    const Vec3F boxSize{ 1,1,1 };
-    const float radius = 1.0f;
-
     const int maxIterations = 100;
     const float surfaceDistance = 0.01f;
     const float maxDistance = 100.0f;
@@ -62,21 +58,54 @@ Vec4F Renderer::PerPixel( Vec2F coord )
         .Direction = activeCamera->GetRayDirections()[int( (int)coord.y * finalImage.GetWidth() + (int)coord.x )]
     };
 
+    HitPayload hit = MarchRay( ray, maxIterations, surfaceDistance, maxDistance );
+
+    if( hit.HitDistance < 0.0f )
+    {
+        //Sky color
+        return Vec4F( 0.2f, 0.4f, 1.0f, 1.0f );
+	}
+
+    Vec3F lightDir = { -1.0f,-1.0f,-1.0f };
+    float ambient = 0.2f;
+
+    float lightIntensity = (std::max)( Vec3F::Dot( hit.WorldNormal, lightDir * -1.0f ), 0.0f );
+    lightIntensity += ambient;
+    lightIntensity = lightIntensity > 1.0f ? 1.0f : lightIntensity;
+
+    Vec3F color = hit.WorldNormal * 0.5f + 0.5f;
+    color *= lightIntensity;
+
+    return Vec4F( color, 1.0f );
+}
+
+Renderer::HitPayload Renderer::MarchRay( Ray ray, int maxIterations, float surfaceDistance, float maxDistance )
+{
+    const Vec3F sphereOrigin{ 0,0,0 };
+    const Vec3F boxSize{ 1,1,1 };
+    const float radius = 1.0f;
+
+    Vec3F origin = ray.Origin;
+
     for( size_t i = 0; i < maxIterations; i++ )
-	{
-        float distance = signedDistanceBox( ray.Origin, sphereOrigin, boxSize );
-		if( distance < surfaceDistance )
-		{
-			return Vec4F( 1.0f, 0.0f, 0.0f, 1.0f );
-		}
+    {
+        float distance = signedDistanceSphere( ray.Origin, sphereOrigin, radius );
+        if( distance < surfaceDistance )
+        {
+            HitPayload hit;
 
-		if( distance > maxDistance )
-		{
-			break;
-		}
+            hit.HitDistance = Vec3F::Distance( origin, ray.Origin );
+            hit.WorldPosition = ray.Origin;
+            hit.WorldNormal = Vec3F( ray.Origin - ray.Direction * distance ).Normalized();
 
-		ray.Origin += ray.Direction * distance;
-	} 
+            return hit;
+        }
 
-    return Vec4F( 0.2f, 0.4f, 1.0f, 1.0f );
+        if( distance > maxDistance )
+        {
+            return HitPayload{ .HitDistance = -1.0f };
+        }
+
+        ray.Origin += ray.Direction * distance;
+    }
 }
