@@ -49,6 +49,7 @@
     <ClCompile Include="Src\App\Renderer.cpp" />
     <ClCompile Include="Src\App\Camera.cpp" />
     <ClCompile Include="Src\App\Scene.cpp" />
+    <ClCompile Include="Src\App\ComputeShader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\App\App.h" />
@@ -78,6 +79,7 @@
     <ClInclude Include="Src\App\Camera.h" />
     <ClInclude Include="Src\App\Ray.h" />
     <ClInclude Include="Src\App\Scene.h" />
+    <ClInclude Include="Src\App\ComputeShader.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="imgui.ini" />
@@ -91,5 +93,8 @@
     <Image Include="Src\Win\Resource\HydroDirectX.ico">
       <Filter>Resource Files</Filter>
     </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Src\App\RayMarcher.hlsl" />
   </ItemGroup>
 </Project>

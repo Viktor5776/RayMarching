@@ -87,6 +87,40 @@ namespace Hydro
 
 			gfx.GetDevice()->CreateShaderResourceView( pTexture.Get(), &srvDesc, &pTextureView );
 		}
+		void SetTexture( ID3D11Texture2D* pOutputTexture )
+		{
+			if( width == 0 || height == 0 )
+			{
+				return;
+			}
+
+			D3D11_TEXTURE2D_DESC textureDesc = {};
+			textureDesc.Width = width;
+			textureDesc.Height = height;
+			textureDesc.MipLevels = 1;
+			textureDesc.ArraySize = 1;
+			textureDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+			textureDesc.SampleDesc.Count = 1;
+			textureDesc.Usage = D3D11_USAGE_DEFAULT;
+			textureDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+			textureDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+			textureDesc.MiscFlags = 0;
+
+			Microsoft::WRL::ComPtr<ID3D11Texture2D> pTexture;
+			auto hr = gfx.GetDevice()->CreateTexture2D( &textureDesc, nullptr, &pTexture );
+			assert( SUCCEEDED( hr ) );
+
+
+			gfx.GetDeviceContext()->CopyResource( pTexture.Get(), pOutputTexture );
+
+			D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+			srvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+			srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+			srvDesc.Texture2D.MipLevels = 1;
+
+			hr = gfx.GetDevice()->CreateShaderResourceView( pTexture.Get(), &srvDesc, &pTextureView);
+			assert( SUCCEEDED( hr ) );
+		}
 		int GetWidth()
 		{
 			return width;
@@ -103,9 +137,9 @@ namespace Hydro
 		{
 			return width != 0 && height != 0;
 		}
-		Graphics& gfx;
 	private:
 		unsigned int width, height;
+		Graphics& gfx;
 		Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> pTextureView;
 	};
 }

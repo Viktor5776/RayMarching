@@ -133,6 +133,7 @@
   <ItemGroup>
     <ClCompile Include="Src\App\App.cpp" />
     <ClCompile Include="Src\App\Camera.cpp" />
+    <ClCompile Include="Src\App\ComputeShader.cpp" />
     <ClCompile Include="Src\App\Renderer.cpp" />
     <ClCompile Include="Src\App\Scene.cpp" />
     <ClCompile Include="Src\ImGui\imgui.cpp" />
@@ -152,6 +153,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\App\Camera.h" />
+    <ClInclude Include="Src\App\ComputeShader.h" />
     <ClInclude Include="Src\App\Ray.h" />
     <ClInclude Include="Src\App\Renderer.h" />
     <ClInclude Include="Src\App\Scene.h" />
@@ -187,6 +189,22 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="Src\Win\Resource\HydroDirectX.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Src\App\RayMarcher.hlsl">
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">5.0</ShaderModel>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">5.0</ShaderModel>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectDir)%(Filename).cso</ObjectFileOutput>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ProjectDir)%(Filename).cso</ObjectFileOutput>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir)%(Filename).cso</ObjectFileOutput>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectDir)%(Filename).cso</ObjectFileOutput>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Compute</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Compute</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compute</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compute</ShaderType>
+    </FxCompile>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

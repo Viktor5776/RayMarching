@@ -1,6 +1,9 @@
 #pragma once
 #include <d3d11.h>       // D3D interface
+#include <DirectXMath.h>
 #pragma comment( lib, "d3d11.lib" )
+#include <d3dcompiler.h> // Shader compiler
+#pragma comment( lib, "d3dcompiler.lib" )
 
 #include <Windows.h>
 #include <wrl.h>
@@ -21,6 +24,7 @@ namespace Hydro
 		void EndFrame();
 		void BeginFrame();
 		ID3D11Device* GetDevice();
+		ID3D11DeviceContext* GetDeviceContext();
 	private:
 		Microsoft::WRL::ComPtr<ID3D11Device> pDevice;
 		Microsoft::WRL::ComPtr<ID3D11DeviceContext> pDeviceContext;

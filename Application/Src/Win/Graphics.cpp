@@ -153,4 +153,8 @@ namespace Hydro
 	{
 		return pDevice.Get();
 	}
+	ID3D11DeviceContext* Graphics::GetDeviceContext()
+	{
+		return pDeviceContext.Get();
+	}
 }
