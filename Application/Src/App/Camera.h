@@ -22,13 +22,10 @@ public:
 	const Vec3F& GetPosition() const { return position; }
 	const Vec3F& GetDirection() const { return forwardDirection; }
 
-	const std::vector<Vec3F>& GetRayDirections() const { return rayDirections; }
-
 	float GetRotationSpeed();
 private:
 	void RecalculateProjection();
 	void RecalcutateView();
-	void RecalculateRayDirections();
 private:
 	Matrix4F projection;
 	Matrix4F view;
@@ -43,8 +40,6 @@ private:
 	Vec3F forwardDirection{ 0.0f, 0.0f, 0.0f };
 
 	Vec3F forwardDirectionT{ 0.0f, 0.0f, 0.0f };
-
-	std::vector<Vec3F> rayDirections;
 
 	uint32_t m_ViewportWidth = 0, m_ViewportHeight = 0;
 };
