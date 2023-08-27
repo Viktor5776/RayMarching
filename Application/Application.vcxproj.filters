@@ -48,7 +48,6 @@
     <ClCompile Include="Src\Win\WinMain.cpp" />
     <ClCompile Include="Src\App\Renderer.cpp" />
     <ClCompile Include="Src\App\Camera.cpp" />
-    <ClCompile Include="Src\App\Scene.cpp" />
     <ClCompile Include="Src\App\ComputeShader.cpp" />
   </ItemGroup>
   <ItemGroup>

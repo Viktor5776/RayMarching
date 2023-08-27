@@ -44,7 +44,7 @@ void ComputeShader::OnResize( int width, int height )
 	assert( SUCCEEDED( hr ) );
 }
 
-void ComputeShader::Dispatch( const Camera& camera )
+void ComputeShader::Dispatch( const Camera& camera, const Scene& scene )
 {
 	//Set Constant buffer
 	struct ConstantBuffer
@@ -53,12 +53,14 @@ void ComputeShader::Dispatch( const Camera& camera )
 		Matrix4F inverseView;
 		Vec3F cameraPosition;
 		float padding;
+		Scene scene;
 	};
 
 	ConstantBuffer cb;
 	cb.inverseProjection = camera.GetInverseProjection();
 	cb.inverseView = camera.GetInverseView();
 	cb.cameraPosition = camera.GetPosition();
+	cb.scene = scene;
 
 	D3D11_BUFFER_DESC cbDesc = {};
 	cbDesc.ByteWidth = sizeof( ConstantBuffer );

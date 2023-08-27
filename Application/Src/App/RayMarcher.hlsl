@@ -1,11 +1,37 @@
+struct Sphere
+{
+    float3 center;
+    float radius;
+};
+
+struct Scene
+{
+    float3 lightDir;
+    float ambient;
+    Sphere spheres[10];
+};
+
 RWTexture2D<float4> Result : register( u0 );
 float4x4 InverseProjectionMatrix : register( c0 );
 float4x4 InverseViewProjectionMatrix : register( c4 );
 float3 cameraPosition : register( c8 );
+Scene scene : register( c9 );
+
 
 float signedDistanceSphere( float3 p, float3 center, float radius )
 {
     return length( p - center ) - radius;
+}
+
+float signedDistanceScene( float3 p )
+{
+    float d = 10000.0f;
+    for ( int i = 0; i < 10; i++ )
+    {
+        if ( scene.spheres[i].radius > 0.0f )
+            d = min( d, signedDistanceSphere( p, scene.spheres[i].center, scene.spheres[i].radius ) );
+    }
+    return d;
 }
 
 struct Ray
@@ -23,14 +49,11 @@ struct HitPayload
 
 HitPayload MarchRay( Ray ray, int maxIterations, float surfaceDistance, float maxDistance )
 {
-    const float3 sphereOrigin = float3( 0, 0, 0 );
-    const float radius = 1.0f;
-
     float3 origin = ray.origin;
 
     for ( int i = 0; i < maxIterations; i++ )
     {
-        float d = signedDistanceSphere( ray.origin, sphereOrigin, radius );
+        float d = signedDistanceScene( ray.origin );
         if ( d < surfaceDistance )
         {
             HitPayload hit;
@@ -94,12 +117,9 @@ void main( uint3 id : SV_DispatchThreadID )
         Result[id.xy] = float4( 0.2f, 0.4f, 1.0f, 1.0f );
         return;
     }
-    
-    float3 lightDir = { -1.0f, -1.0f, -1.0f };
-    float ambient = 0.2f;
 
-    float lightIntensity = max(dot( hit.WorldNormal, lightDir * -1.0f ), 0.0f);
-    lightIntensity += ambient;
+    float lightIntensity = max(dot( hit.WorldNormal, scene.lightDir * -1.0f ), 0.0f);
+    lightIntensity += scene.ambient;
     lightIntensity = lightIntensity > 1.0f ? 1.0f : lightIntensity;
 
     float3 color = hit.WorldNormal * 0.5f + 0.5f;

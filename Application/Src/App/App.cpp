@@ -11,6 +11,12 @@ namespace Hydro
         renderer( wnd.Gfx() ),
         camera( 90.0f, 0.1f, 100.0f )
 	{
+        comboBoxIndex = 0;
+        //Init Scene
+        scene.lightDir = { -1.0f,-1.0f,-1.0f };
+        scene.ambient = 0.2f;
+        scene.spheres[0] = { { 0.0f,0.0f,0.0f }, 1.0f };
+        scene.spheres[1] = { { 0.0f,-101.0f,0.0f }, 100.0f };
 	}
 
 	App::~App()
@@ -27,6 +33,8 @@ namespace Hydro
 		wnd.Gfx().BeginFrame();
 		
 		RenderImGuiBaseGUI();
+
+        scene.RenderGUI( comboBoxIndex );
 
         ImGui::Begin( "Settings" );
         ImGui::Text( "Last render time: %.3fms", lastRenderTime * 1000 );
@@ -69,7 +77,7 @@ namespace Hydro
 
         renderer.OnResize( ViewportWidth, ViewportHeight );
         camera.OnResize( ViewportWidth, ViewportHeight );
-        renderer.Render( camera );
+        renderer.Render( camera, scene );
 
         lastRenderTime = timer.Mark();
     }

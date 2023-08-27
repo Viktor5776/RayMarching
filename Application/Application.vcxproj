@@ -135,7 +135,6 @@
     <ClCompile Include="Src\App\Camera.cpp" />
     <ClCompile Include="Src\App\ComputeShader.cpp" />
     <ClCompile Include="Src\App\Renderer.cpp" />
-    <ClCompile Include="Src\App\Scene.cpp" />
     <ClCompile Include="Src\ImGui\imgui.cpp" />
     <ClCompile Include="Src\ImGui\imgui_demo.cpp" />
     <ClCompile Include="Src\ImGui\imgui_draw.cpp" />

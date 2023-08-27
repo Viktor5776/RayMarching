@@ -4,6 +4,8 @@
 #include "../Win/Image.h"
 #include "Renderer.h"
 #include "Camera.h"
+#include "Scene.h"
+#include <optional>
 
 namespace Hydro
 {
@@ -24,7 +26,10 @@ namespace Hydro
 		Renderer renderer;
 		Camera camera;
 		uint32_t ViewportWidth = 0, ViewportHeight = 0;
-		
+
+		Scene scene;
+		std::optional<int> comboBoxIndex;
+
 		float lastRenderTime = 0.0f;
 	};
 }

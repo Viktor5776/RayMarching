@@ -6,11 +6,9 @@ Renderer::Renderer( Graphics& gfx )
 {
 }
 
-void Renderer::Render( const Camera& camera  )
+void Renderer::Render( const Camera& camera, const Scene& scene )
 {
-    activeCamera = &camera;
-
-    rayMarcherShader.Dispatch( *activeCamera );
+    rayMarcherShader.Dispatch( camera, scene );
 }
 
 void Renderer::OnResize( int width, int height )

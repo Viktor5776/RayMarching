@@ -12,10 +12,9 @@ class Renderer
 {
 public:
 	Renderer( Graphics& gfx );
-	void Render( const Camera& camera );
+	void Render( const Camera& camera, const Scene& scene );
 	void OnResize( int width, int height );
 	Image& GetFinalImage() { return rayMarcherShader.GetImage(); }
 private:
-	const Camera* activeCamera = nullptr;
 	ComputeShader rayMarcherShader;
 };
