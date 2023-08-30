@@ -1,4 +1,5 @@
 #include "ComputeShader.h"
+#include "../Win/Texture.h"
 
 ComputeShader::ComputeShader( Graphics& gfx, const std::wstring& path )
 	:
@@ -10,6 +11,47 @@ ComputeShader::ComputeShader( Graphics& gfx, const std::wstring& path )
 	D3DReadFileToBlob( path.c_str(), &pBlob );
 	auto hr = gfx.GetDevice()->CreateComputeShader( pBlob->GetBufferPointer(), pBlob->GetBufferSize(), nullptr, &pComputeShader );
 	assert( SUCCEEDED( hr ) );
+
+	//Load skybox
+	Texture skybox = Texture( "Src/App/Textures/Skybox.bmp" );
+	
+	D3D11_TEXTURE2D_DESC textureDesc = {};
+	textureDesc.Width = skybox.GetWidth();
+	textureDesc.Height = skybox.GetHeight();
+	textureDesc.MipLevels = 1;
+	textureDesc.ArraySize = 1;
+	textureDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	textureDesc.SampleDesc.Count = 1;
+	textureDesc.Usage = D3D11_USAGE_IMMUTABLE;
+	textureDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+	textureDesc.CPUAccessFlags = 0;
+	textureDesc.MiscFlags = 0;
+
+	D3D11_SUBRESOURCE_DATA subresourceData = {};
+	subresourceData.pSysMem = (void*)skybox.GetData();
+	subresourceData.SysMemPitch = skybox.GetWidth() * 4;
+
+	hr = gfx.GetDevice()->CreateTexture2D( &textureDesc, &subresourceData, &pSkyboxTexture );
+	assert( SUCCEEDED( hr ) );
+
+	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+	srvDesc.Format = textureDesc.Format;
+	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+	srvDesc.Texture2D.MipLevels = 1;
+
+	hr = gfx.GetDevice()->CreateShaderResourceView( pSkyboxTexture.Get(), &srvDesc, &pSkyboxSRV );
+	assert( SUCCEEDED( hr ) );
+
+	D3D11_SAMPLER_DESC samplerDesc = {};
+	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+
+	hr = gfx.GetDevice()->CreateSamplerState( &samplerDesc, &pSkyboxSampler );
+	assert( SUCCEEDED( hr ) );
+
+	gfx.GetDeviceContext()->CSSetSamplers( 0, 1, pSkyboxSampler.GetAddressOf() );
 
 	OnResize( 0, 0 );
 }
@@ -83,6 +125,7 @@ void ComputeShader::Dispatch( const Camera& camera, const Scene& scene )
 	//Set other resources
 	gfx.GetDeviceContext()->CSSetShader( pComputeShader.Get(), nullptr, 0 );
 	gfx.GetDeviceContext()->CSSetUnorderedAccessViews( 0, 1, pOutputUAV.GetAddressOf(), nullptr );
+	gfx.GetDeviceContext()->CSSetShaderResources( 0, 1, pSkyboxSRV.GetAddressOf() );
 
 
 	//Dispatch
@@ -92,6 +135,9 @@ void ComputeShader::Dispatch( const Camera& camera, const Scene& scene )
 	gfx.GetDeviceContext()->CSSetShader( nullptr, nullptr, 0 );
 	ID3D11UnorderedAccessView* nullUAV = nullptr;
 	gfx.GetDeviceContext()->CSSetUnorderedAccessViews( 0, 1, &nullUAV, nullptr );
+	ID3D11ShaderResourceView* nullSRV = nullptr;
+	gfx.GetDeviceContext()->CSSetShaderResources( 0, 1, &nullSRV );
+
 
 	//Copy output texture to image
 	image.SetTexture( pOutputTexture.Get() );

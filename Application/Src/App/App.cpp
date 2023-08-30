@@ -16,7 +16,6 @@ namespace Hydro
         scene.lightDir = { -1.0f,-1.0f,-1.0f };
         scene.ambient = 0.2f;
         scene.spheres[0] = { { 0.0f,0.0f,0.0f }, 1.0f };
-        scene.spheres[1] = { { 0.0f,-101.0f,0.0f }, 100.0f };
 	}
 
 	App::~App()

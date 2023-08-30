@@ -49,6 +49,7 @@
     <ClCompile Include="Src\App\Renderer.cpp" />
     <ClCompile Include="Src\App\Camera.cpp" />
     <ClCompile Include="Src\App\ComputeShader.cpp" />
+    <ClCompile Include="Src\Win\Texture.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\App\App.h" />
@@ -79,6 +80,7 @@
     <ClInclude Include="Src\App\Ray.h" />
     <ClInclude Include="Src\App\Scene.h" />
     <ClInclude Include="Src\App\ComputeShader.h" />
+    <ClInclude Include="Src\Win\Texture.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="imgui.ini" />
@@ -90,6 +92,9 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="Src\Win\Resource\HydroDirectX.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Src\App\Textures\Skybox.bmp">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

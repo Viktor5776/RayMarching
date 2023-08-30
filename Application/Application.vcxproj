@@ -147,6 +147,7 @@
     <ClCompile Include="Src\Win\Graphics.cpp" />
     <ClCompile Include="Src\Win\Keyboard.cpp" />
     <ClCompile Include="Src\Win\Mouse.cpp" />
+    <ClCompile Include="Src\Win\Texture.cpp" />
     <ClCompile Include="Src\Win\Window.cpp" />
     <ClCompile Include="Src\Win\WinMain.cpp" />
   </ItemGroup>
@@ -178,6 +179,7 @@
     <ClInclude Include="Src\Win\Image.h" />
     <ClInclude Include="Src\Win\Keyboard.h" />
     <ClInclude Include="Src\Win\Mouse.h" />
+    <ClInclude Include="Src\Win\Texture.h" />
     <ClInclude Include="Src\Win\Window.h" />
   </ItemGroup>
   <ItemGroup>
@@ -187,6 +189,7 @@
     <ResourceCompile Include="Src\Win\Resource\Application.rc" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="Src\App\Textures\Skybox.bmp" />
     <Image Include="Src\Win\Resource\HydroDirectX.ico" />
   </ItemGroup>
   <ItemGroup>

@@ -21,4 +21,8 @@ private:
 
 	Microsoft::WRL::ComPtr<ID3D11Texture2D> pOutputTexture;
 	Microsoft::WRL::ComPtr<ID3D11UnorderedAccessView> pOutputUAV;
+
+	Microsoft::WRL::ComPtr<ID3D11Texture2D> pSkyboxTexture;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> pSkyboxSRV;
+	Microsoft::WRL::ComPtr<ID3D11SamplerState> pSkyboxSampler;
 };

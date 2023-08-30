@@ -12,11 +12,14 @@ struct Scene
 };
 
 RWTexture2D<float4> Result : register( u0 );
+Texture2D<float4> SkyboxTexture : register( t0 );
+SamplerState sampler_SkyboxTexture : register( s0 );
 float4x4 InverseProjectionMatrix : register( c0 );
 float4x4 InverseViewProjectionMatrix : register( c4 );
 float3 cameraPosition : register( c8 );
 Scene scene : register( c9 );
 
+static const float PI = 3.14159265f;
 
 float signedDistanceSphere( float3 p, float3 center, float radius )
 {
@@ -60,7 +63,14 @@ HitPayload MarchRay( Ray ray, int maxIterations, float surfaceDistance, float ma
 
             hit.HitDistance = distance( origin, ray.origin );
             hit.WorldPosition = ray.origin;
-            hit.WorldNormal = normalize( ray.origin - ray.dir * d );
+            
+            //Calculate normal
+            float epsilon = 0.001;
+            float centerDistance = signedDistanceScene( ray.origin );
+            float xDistance = signedDistanceScene( ray.origin + float3( epsilon, 0, 0 ) );
+            float yDistance = signedDistanceScene( ray.origin + float3( 0, epsilon, 0 ) );
+            float zDistance = signedDistanceScene( ray.origin + float3( 0, 0, epsilon ) );
+            hit.WorldNormal = (float3( xDistance, yDistance, zDistance ) - centerDistance) / epsilon;
 
             return hit;
         }
@@ -114,7 +124,10 @@ void main( uint3 id : SV_DispatchThreadID )
     if( hit.HitDistance < 0.0f )
     {
         //Sky color
-        Result[id.xy] = float4( 0.2f, 0.4f, 1.0f, 1.0f );
+        float theta = acos( ray.dir.y ) / -PI;
+        float phi = atan2( ray.dir.x, -ray.dir.z ) / -PI * 0.5f;
+        float4 color = SkyboxTexture.SampleLevel( sampler_SkyboxTexture, float2( phi, theta ), 0 );
+        Result[id.xy] = color;
         return;
     }
 
