@@ -6,8 +6,9 @@ using namespace Hydro;
 
 struct Sphere
 {
-	Vec3F pos;
-	float radius;
+    Vec3F pos = Vec3F( 0.0f );
+	float radius = 0.0f;
+    int materialIndex = 0;
 
 	void SpawnControlWindow( int id )
 	{
@@ -17,8 +18,31 @@ struct Sphere
 		ImGui::DragFloat3( "pos", &pos.x, 0.1f );
 		ImGui::Text( "Radius" );
 		ImGui::DragFloat( "radius", &radius, 0.1f );
+        ImGui::Text( "Material" );
+		ImGui::DragInt( "material",&materialIndex,0.1f,0,9 );
 		ImGui::Separator();
 	}
+};
+
+struct Material
+{
+    Vec3F albedo;
+    float roughness;
+    float metallic;
+    //Emission
+
+    void SpawnControlWindow( int id )
+    {
+        using namespace std::string_literals;
+
+        ImGui::Text( "Position" );
+        ImGui::ColorEdit3( "pos",&albedo.x,0.1f );
+        ImGui::Text( "Roughness" );
+        ImGui::DragFloat( "roughness",&roughness,0.05f,0.0f,1.0f );
+        ImGui::Text( "Metallic" );
+        ImGui::DragFloat( "metallic",&metallic,0.05f,0.0f,1.0f );
+        ImGui::Separator();
+    }
 };
 
 struct Scene
@@ -26,6 +50,7 @@ struct Scene
 	Vec3F lightDir;
 	float ambient;
 	Sphere spheres[10];
+    Material materials[10];
 
 	void RenderGUI( std::optional<int>& comboBoxIndex )
 	{

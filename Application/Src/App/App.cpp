@@ -15,7 +15,10 @@ namespace Hydro
         //Init Scene
         scene.lightDir = { -1.0f,-1.0f,-1.0f };
         scene.ambient = 0.2f;
-        scene.spheres[0] = { { 0.0f,0.0f,0.0f }, 1.0f };
+        scene.spheres[0] = { .pos{ 0.0f,0.0f,0.0f }, .radius = 1.0f, .materialIndex = 1 };
+        scene.materials[0] = { { 1.0f, 0.0f,0.0f}, 1.0f,1.0f };
+        scene.materials[1] = { { 0.0f, 1.0f,0.0f}, 1.0f,1.0f };
+        scene.materials[2] = { { 0.0f, 0.0f,1.0f}, 1.0f,1.0f };
 	}
 
 	App::~App()

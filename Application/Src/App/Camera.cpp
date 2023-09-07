@@ -25,7 +25,7 @@ bool Camera::OnUpdate( Window& wnd, float dt )
 		delta.y += d->y;
 	}
 
-	if( !wnd.mouse.RightIsPressed() )
+	if( !wnd.mouse.RightIsPressed() && !wnd.keyboard.KeyIsPressed( 'M' ) )
 	{
 		wnd.EnableCursor();
 		return false;

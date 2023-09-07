@@ -94,7 +94,7 @@ void ComputeShader::Dispatch( const Camera& camera, const Scene& scene )
 		Matrix4F inverseProjection;
 		Matrix4F inverseView;
 		Vec3F cameraPosition;
-		float padding;
+		float pad;
 		Scene scene;
 	};
 

@@ -2,6 +2,14 @@ struct Sphere
 {
     float3 center;
     float radius;
+    int materialIndex;
+};
+
+struct Material
+{
+    float3 albedo;
+    float roughness;
+    float metallic;
 };
 
 struct Scene
@@ -9,6 +17,7 @@ struct Scene
     float3 lightDir;
     float ambient;
     Sphere spheres[10];
+    Material materials[10];
 };
 
 RWTexture2D<float4> Result : register( u0 );
@@ -26,15 +35,29 @@ float signedDistanceSphere( float3 p, float3 center, float radius )
     return length( p - center ) - radius;
 }
 
-float signedDistanceScene( float3 p )
+
+struct ObjectDistance
 {
-    float d = 10000.0f;
+    float distance;
+    int objectIndex;
+};
+
+ObjectDistance signedDistanceScene( float3 p )
+{
+    ObjectDistance result;
+    result.distance = 10000.0f;
+    result.objectIndex = -1;
+    
     for ( int i = 0; i < 10; i++ )
     {
         if ( scene.spheres[i].radius > 0.0f )
-            d = min( d, signedDistanceSphere( p, scene.spheres[i].center, scene.spheres[i].radius ) );
+        {
+            result.distance = min(result.distance, signedDistanceSphere(p, scene.spheres[i].center, scene.spheres[i].radius));
+            result.objectIndex = i;
+        }
     }
-    return d;
+    
+    return result;
 }
 
 struct Ray
@@ -48,6 +71,7 @@ struct HitPayload
     float HitDistance;
     float3 WorldPosition;
     float3 WorldNormal;
+    int ObjectIndex;
 };
 
 HitPayload MarchRay( Ray ray, int maxIterations, float surfaceDistance, float maxDistance )
@@ -56,41 +80,44 @@ HitPayload MarchRay( Ray ray, int maxIterations, float surfaceDistance, float ma
 
     for ( int i = 0; i < maxIterations; i++ )
     {
-        float d = signedDistanceScene( ray.origin );
-        if ( d < surfaceDistance )
+        ObjectDistance d = signedDistanceScene( ray.origin );
+        if ( d.distance < surfaceDistance )
         {
             HitPayload hit;
 
             hit.HitDistance = distance( origin, ray.origin );
             hit.WorldPosition = ray.origin;
+            hit.ObjectIndex = d.objectIndex;
             
             //Calculate normal
             float epsilon = 0.001;
-            float centerDistance = signedDistanceScene( ray.origin );
-            float xDistance = signedDistanceScene( ray.origin + float3( epsilon, 0, 0 ) );
-            float yDistance = signedDistanceScene( ray.origin + float3( 0, epsilon, 0 ) );
-            float zDistance = signedDistanceScene( ray.origin + float3( 0, 0, epsilon ) );
+            float centerDistance = signedDistanceScene( ray.origin ).distance;
+            float xDistance = signedDistanceScene( ray.origin + float3( epsilon, 0, 0 ) ).distance;
+            float yDistance = signedDistanceScene( ray.origin + float3( 0, epsilon, 0 ) ).distance;
+            float zDistance = signedDistanceScene( ray.origin + float3( 0, 0, epsilon ) ).distance;
             hit.WorldNormal = (float3( xDistance, yDistance, zDistance ) - centerDistance) / epsilon;
 
             return hit;
         }
 
-        if ( d > maxDistance )
+        if ( d.distance > maxDistance )
         {
             HitPayload hit;
             hit.HitDistance = -1.0f;
             hit.WorldNormal = float3( 0, 0, 0 );
             hit.WorldPosition = float3( 0, 0, 0 );
+            hit.ObjectIndex = -1;
             return hit;
         }
 
-        ray.origin += ray.dir * d;
+        ray.origin += ray.dir * d.distance;
     }
     
     HitPayload hit;
     hit.HitDistance = -1.0f;
     hit.WorldNormal = float3( 0, 0, 0 );
     hit.WorldPosition = float3( 0, 0, 0 );
+    hit.ObjectIndex = -1;
     return hit;
 }
 
@@ -121,9 +148,9 @@ void main( uint3 id : SV_DispatchThreadID )
     
     HitPayload hit = MarchRay( ray, maxIterations, minDistance, maxDistance );
     
+    //Skybox
     if( hit.HitDistance < 0.0f )
     {
-        //Sky color
         float theta = acos( ray.dir.y ) / -PI;
         float phi = atan2( ray.dir.x, -ray.dir.z ) / -PI * 0.5f;
         float4 color = SkyboxTexture.SampleLevel( sampler_SkyboxTexture, float2( phi, theta ), 0 );
@@ -131,11 +158,13 @@ void main( uint3 id : SV_DispatchThreadID )
         return;
     }
 
+    
     float lightIntensity = max(dot( hit.WorldNormal, scene.lightDir * -1.0f ), 0.0f);
     lightIntensity += scene.ambient;
     lightIntensity = lightIntensity > 1.0f ? 1.0f : lightIntensity;
 
-    float3 color = hit.WorldNormal * 0.5f + 0.5f;
+    
+    float3 color = scene.materials[scene.spheres[hit.ObjectIndex].materialIndex].albedo;
     color *= lightIntensity;
     
     Result[id.xy] = float4( color, 1.0f );
