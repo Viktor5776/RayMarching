@@ -131,8 +131,7 @@ void main( uint3 id : SV_DispatchThreadID )
     float4x4 inverseViewProjectionMatrix = transpose( InverseViewProjectionMatrix );
     
     float2 uv = float2( id.xy ) / float2( width, height );
-    
-    
+
     uint maxIterations = 100;
     float minDistance = 0.01f;
     float maxDistance = 100.0f;

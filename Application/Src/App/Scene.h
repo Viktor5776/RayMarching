@@ -9,6 +9,7 @@ struct Sphere
     Vec3F pos = Vec3F( 0.0f );
 	float radius = 0.0f;
     int materialIndex = 0;
+    Vec3I padding;
 
 	void SpawnControlWindow( int id )
 	{
@@ -29,14 +30,15 @@ struct Material
     Vec3F albedo;
     float roughness;
     float metallic;
+    Vec3F padding;
     //Emission
 
     void SpawnControlWindow( int id )
     {
         using namespace std::string_literals;
 
-        ImGui::Text( "Position" );
-        ImGui::ColorEdit3( "pos",&albedo.x,0.1f );
+        ImGui::Text( "Albedo" );
+        ImGui::ColorEdit3( "Albedo",&albedo.x );
         ImGui::Text( "Roughness" );
         ImGui::DragFloat( "roughness",&roughness,0.05f,0.0f,1.0f );
         ImGui::Text( "Metallic" );
@@ -52,23 +54,24 @@ struct Scene
 	Sphere spheres[10];
     Material materials[10];
 
-	void RenderGUI( std::optional<int>& comboBoxIndex )
+	void RenderGUI( std::optional<int>& comboBoxIndexObject, std::optional<int>& comboBoxIndexMaterial )
 	{
+        using namespace std::string_literals;
         ImGui::Begin( "Scene" );
         ImGui::SliderFloat3( "Light Direction", &lightDir.x, -1.0f, 1.0f );
         ImGui::SliderFloat( "Ambient", &ambient, 0.0f, 1.0f );
-        using namespace std::string_literals;
         ImGui::NewLine();
+        ImGui::Text( "Objects" );
         ImGui::Separator();
-        const auto preview = comboBoxIndex ? std::to_string( *comboBoxIndex ) : "Choose a shpere..."s;
-        if( ImGui::BeginCombo( "Sphere number", preview.c_str() ) )
+        const auto previewObject = comboBoxIndexObject ? std::to_string( *comboBoxIndexObject ) : "Choose a object..."s;
+        if( ImGui::BeginCombo( "Sphere number", previewObject.c_str() ) )
         {
             for( int i = 0; i < 10; i++ )
             {
-                const bool selected = comboBoxIndex ? *comboBoxIndex == i : false;
+                const bool selected = comboBoxIndexObject ? *comboBoxIndexObject == i : false;
                 if( ImGui::Selectable( std::to_string( i ).c_str(), selected ) )
                 {
-                    comboBoxIndex = i;
+                    comboBoxIndexObject = i;
                 }
                 if( selected )
                 {
@@ -77,9 +80,33 @@ struct Scene
             }
             ImGui::EndCombo();
         }
-        if( comboBoxIndex.has_value() )
+        if( comboBoxIndexObject.has_value() )
         {
-            spheres[comboBoxIndex.value()].SpawnControlWindow( comboBoxIndex.value() );
+            spheres[comboBoxIndexObject.value()].SpawnControlWindow( comboBoxIndexObject.value() );
+        }
+        ImGui::NewLine();
+        ImGui::Text( "Materials" );
+        ImGui::Separator();
+        const auto previewMaterial = comboBoxIndexMaterial ? std::to_string( *comboBoxIndexMaterial ) : "Choose a material..."s;
+        if( ImGui::BeginCombo( "Material Number", previewMaterial.c_str() ) )
+        {
+            for( int i = 0; i < 10; i++ )
+            {
+                const bool selected = comboBoxIndexMaterial ? *comboBoxIndexMaterial == i : false;
+                if( ImGui::Selectable( std::to_string( i ).c_str(), selected ) )
+                {
+                    comboBoxIndexMaterial = i;
+                }
+                if( selected )
+                {
+                    ImGui::SetItemDefaultFocus();
+                }
+            }
+            ImGui::EndCombo();
+        }
+        if( comboBoxIndexMaterial.has_value() )
+        {
+            materials[comboBoxIndexMaterial.value()].SpawnControlWindow( comboBoxIndexMaterial.value() );
         }
         ImGui::End();
 	}

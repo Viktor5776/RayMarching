@@ -11,11 +11,12 @@ namespace Hydro
         renderer( wnd.Gfx() ),
         camera( 90.0f, 0.1f, 100.0f )
 	{
-        comboBoxIndex = 0;
+        comboBoxIndexObject = 0;
+        comboBoxIndexMaterial = 0;
         //Init Scene
         scene.lightDir = { -1.0f,-1.0f,-1.0f };
         scene.ambient = 0.2f;
-        scene.spheres[0] = { .pos{ 0.0f,0.0f,0.0f }, .radius = 1.0f, .materialIndex = 1 };
+        scene.spheres[0] = { .pos{ 0.0f,0.0f,0.0f }, .radius = 1.0f, .materialIndex = 0 };
         scene.materials[0] = { { 1.0f, 0.0f,0.0f}, 1.0f,1.0f };
         scene.materials[1] = { { 0.0f, 1.0f,0.0f}, 1.0f,1.0f };
         scene.materials[2] = { { 0.0f, 0.0f,1.0f}, 1.0f,1.0f };
@@ -36,7 +37,7 @@ namespace Hydro
 		
 		RenderImGuiBaseGUI();
 
-        scene.RenderGUI( comboBoxIndex );
+        scene.RenderGUI( comboBoxIndexObject, comboBoxIndexMaterial );
 
         ImGui::Begin( "Settings" );
         ImGui::Text( "Last render time: %.3fms", lastRenderTime * 1000 );

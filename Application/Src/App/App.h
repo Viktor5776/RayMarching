@@ -28,7 +28,8 @@ namespace Hydro
 		uint32_t ViewportWidth = 0, ViewportHeight = 0;
 
 		Scene scene;
-		std::optional<int> comboBoxIndex;
+		std::optional<int> comboBoxIndexObject;
+		std::optional<int> comboBoxIndexMaterial;
 
 		float lastRenderTime = 0.0f;
 	};
