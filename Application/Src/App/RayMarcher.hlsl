@@ -29,12 +29,25 @@ float3 cameraPosition : register( c8 );
 Scene scene : register( c9 );
 
 static const float PI = 3.14159265f;
+uint seed = 0;
 
 float signedDistanceSphere( float3 p, float3 center, float radius )
 {
     return length( p - center ) - radius;
 }
 
+uint PCG_Hash( uint input )
+{
+    uint state = input * 747796405u + 2891336453u;
+    uint word = ((state >> ((state >> 28u) + 4u)) ^ state) * 277803737u;
+    return (word >> 22u) ^ word;
+}
+
+float RandomFloat( inout uint seed )
+{
+    seed = PCG_Hash( seed );
+    return (float) seed / (float)0xffffffffu;
+}
 
 struct ObjectDistance
 {
@@ -82,7 +95,7 @@ struct HitPayload
 HitPayload MarchRay( Ray ray, int maxIterations, float surfaceDistance, float maxDistance )
 {
     float3 origin = ray.origin;
-
+    
     for ( int i = 0; i < maxIterations; i++ )
     {
         ObjectDistance d = signedDistanceScene( ray.origin );
@@ -149,6 +162,10 @@ void main( uint3 id : SV_DispatchThreadID )
     float4 target = mul( inverseProjectionMatrix, float4( coord.x, coord.y, 1.0f, 1.0f ) );
     float4 rayDir4D = mul( inverseViewProjectionMatrix, float4( normalize( float3( target.x, target.y, target.z ) / target.w ), 0.0f ) );
     ray.dir = float3( rayDir4D.xyz );
+    
+    seed = id.x + id.y * width;
+    uint frameIndex = 1;
+    seed *= frameIndex;
     
     HitPayload hit = MarchRay( ray, maxIterations, minDistance, maxDistance );
     
