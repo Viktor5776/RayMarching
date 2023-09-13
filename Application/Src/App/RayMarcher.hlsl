@@ -52,8 +52,13 @@ ObjectDistance signedDistanceScene( float3 p )
     {
         if ( scene.spheres[i].radius > 0.0f )
         {
-            result.distance = min(result.distance, signedDistanceSphere(p, scene.spheres[i].center, scene.spheres[i].radius));
-            result.objectIndex = i;
+            float tempDistance = signedDistanceSphere(p, scene.spheres[i].center, scene.spheres[i].radius);
+            
+            if( tempDistance < result.distance )
+            {
+                result.distance = tempDistance;
+                result.objectIndex = i;
+            }
         }
     }
     
