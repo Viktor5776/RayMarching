@@ -29,7 +29,6 @@ float3 cameraPosition : register( c8 );
 Scene scene : register( c9 );
 
 static const float PI = 3.14159265f;
-uint seed = 0;
 
 float signedDistanceSphere( float3 p, float3 center, float radius )
 {
@@ -154,39 +153,53 @@ void main( uint3 id : SV_DispatchThreadID )
     float minDistance = 0.01f;
     float maxDistance = 100.0f;
     
-    Ray ray;
-    ray.origin = cameraPosition;
+    Ray originalRay;
+    originalRay.origin = cameraPosition;
     
     float2 coord = uv * 2.0f - 1.0f;
     
     float4 target = mul( inverseProjectionMatrix, float4( coord.x, coord.y, 1.0f, 1.0f ) );
     float4 rayDir4D = mul( inverseViewProjectionMatrix, float4( normalize( float3( target.x, target.y, target.z ) / target.w ), 0.0f ) );
-    ray.dir = float3( rayDir4D.xyz );
+    originalRay.dir = float3( rayDir4D.xyz );
     
-    seed = id.x + id.y * width;
-    uint frameIndex = 1;
-    seed *= frameIndex;
+    uint seed = id.x + id.y * width;
     
-    HitPayload hit = MarchRay( ray, maxIterations, minDistance, maxDistance );
+    const uint numSamples = 1;
     
-    //Skybox
-    if( hit.HitDistance < 0.0f )
+    //Accumalate color
+    float3 accumelatedColor = float3( 0, 0, 0 );
+    
+    for ( uint i = 0; i < numSamples; i++ )
     {
-        float theta = acos( ray.dir.y ) / -PI;
-        float phi = atan2( ray.dir.x, -ray.dir.z ) / -PI * 0.5f;
-        float4 color = SkyboxTexture.SampleLevel( sampler_SkyboxTexture, float2( phi, theta ), 0 );
-        Result[id.xy] = color;
-        return;
+        Ray ray = originalRay;
+        //Generate small diffrence in ray direction between samples
+        float2 delta = float2( RandomFloat( seed ), RandomFloat( seed ) ) / float2( width, height );
+        ray.dir += float3( delta, 0.0f );
+        
+        HitPayload hit = MarchRay( ray, maxIterations, minDistance, maxDistance );
+    
+        //Skybox
+        if ( hit.HitDistance < 0.0f )
+        {
+            float theta = acos( ray.dir.y ) / -PI;
+            float phi = atan2( ray.dir.x, -ray.dir.z ) / -PI * 0.5f;
+            float4 color = SkyboxTexture.SampleLevel( sampler_SkyboxTexture, float2( phi, theta ), 0 );
+            accumelatedColor += color.xyz;
+            continue;
+        }
+
+    
+        float lightIntensity = max( dot( hit.WorldNormal, scene.lightDir * -1.0f ), 0.0f );
+        lightIntensity += scene.ambient;
+        lightIntensity = lightIntensity > 1.0f ? 1.0f : lightIntensity;
+
+    
+        float3 color = scene.materials[scene.spheres[hit.ObjectIndex].materialIndex].albedo;
+        color *= lightIntensity;
+        
+        accumelatedColor += color;
     }
-
     
-    float lightIntensity = max(dot( hit.WorldNormal, scene.lightDir * -1.0f ), 0.0f);
-    lightIntensity += scene.ambient;
-    lightIntensity = lightIntensity > 1.0f ? 1.0f : lightIntensity;
-
-    
-    float3 color = scene.materials[scene.spheres[hit.ObjectIndex].materialIndex].albedo;
-    color *= lightIntensity;
-    
-    Result[id.xy] = float4( color, 1.0f );
+    accumelatedColor /= numSamples;
+    Result[id.xy] = float4( accumelatedColor, 1.0f );
 }
