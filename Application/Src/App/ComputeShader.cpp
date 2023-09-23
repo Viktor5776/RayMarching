@@ -1,5 +1,6 @@
 #include "ComputeShader.h"
 #include "../Win/Texture.h"
+#include "../Utils/Random.h"
 
 ComputeShader::ComputeShader( Graphics& gfx, const std::wstring& path )
 	:
@@ -96,7 +97,9 @@ void ComputeShader::Dispatch( const Camera& camera, const Scene& scene, int rend
 		Vec3F cameraPosition;
 		float pad = 0.0f;
 		int renderIterations;
-		int pad1[3];
+		int pad1[3] = { 0 };
+		unsigned int randomSeed;
+		int pad2[3] = { 0 };
 		Scene scene;
 	};
 
@@ -105,6 +108,7 @@ void ComputeShader::Dispatch( const Camera& camera, const Scene& scene, int rend
 	cb.inverseView = camera.GetInverseView();
 	cb.cameraPosition = camera.GetPosition();
 	cb.renderIterations = renderIterations;
+	cb.randomSeed = Hydro::Random::UInt();
 	cb.scene = scene;
 
 	D3D11_BUFFER_DESC cbDesc = {};

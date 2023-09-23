@@ -17,9 +17,9 @@ namespace Hydro
         scene.lightDir = { -1.0f,-1.0f,-1.0f };
         scene.ambient = 0.2f;
         scene.spheres[0] = { .pos{ 0.0f,0.0f,0.0f }, .radius = 1.0f, .materialIndex = 0 };
-        scene.materials[0] = { { 1.0f, 0.0f,0.0f}, 1.0f,1.0f };
-        scene.materials[1] = { { 0.0f, 1.0f,0.0f}, 1.0f,1.0f };
-        scene.materials[2] = { { 0.0f, 0.0f,1.0f}, 1.0f,1.0f };
+        scene.spheres[1] = { .pos{0.0f,-101.0f,0.0f}, .radius = 100.0f, .materialIndex = 1 };
+        scene.materials[0] = { { 1.0f, 0.0f,0.0f} };
+        scene.materials[1] = { { 0.1f, 0.1f,0.1f} };
 	}
 
 	App::~App()

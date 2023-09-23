@@ -28,9 +28,7 @@ struct Sphere
 struct Material
 {
     Vec3F albedo;
-    float roughness;
-    float metallic;
-    Vec3F padding;
+    float padding;
     //Emission
 
     void SpawnControlWindow( int id )
@@ -39,10 +37,6 @@ struct Material
 
         ImGui::Text( "Albedo" );
         ImGui::ColorEdit3( "Albedo",&albedo.x );
-        ImGui::Text( "Roughness" );
-        ImGui::DragFloat( "roughness",&roughness,0.05f,0.0f,1.0f );
-        ImGui::Text( "Metallic" );
-        ImGui::DragFloat( "metallic",&metallic,0.05f,0.0f,1.0f );
         ImGui::Separator();
     }
 };
