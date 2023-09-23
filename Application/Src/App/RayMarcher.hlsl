@@ -26,7 +26,8 @@ SamplerState sampler_SkyboxTexture : register( s0 );
 float4x4 InverseProjectionMatrix : register( c0 );
 float4x4 InverseViewProjectionMatrix : register( c4 );
 float3 cameraPosition : register( c8 );
-Scene scene : register( c9 );
+int renderInterations : register( c9 );
+Scene scene : register( c10 );
 
 static const float PI = 3.14159265f;
 
@@ -164,12 +165,10 @@ void main( uint3 id : SV_DispatchThreadID )
     
     uint seed = id.x + id.y * width;
     
-    const uint numSamples = 1;
-    
     //Accumalate color
     float3 accumelatedColor = float3( 0, 0, 0 );
     
-    for ( uint i = 0; i < numSamples; i++ )
+    for ( int i = 0; i < renderInterations; i++ )
     {
         Ray ray = originalRay;
         //Generate small diffrence in ray direction between samples
@@ -200,6 +199,6 @@ void main( uint3 id : SV_DispatchThreadID )
         accumelatedColor += color;
     }
     
-    accumelatedColor /= numSamples;
+    accumelatedColor /= renderInterations;
     Result[id.xy] = float4( accumelatedColor, 1.0f );
 }

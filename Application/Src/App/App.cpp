@@ -42,6 +42,8 @@ namespace Hydro
         ImGui::Begin( "Settings" );
         ImGui::Text( "Last render time: %.3fms", lastRenderTime * 1000 );
         ImGui::Text( "Fps: %.1f", ImGui::GetIO().Framerate );
+        ImGui::NewLine();
+        ImGui::InputInt("Render iterations", &renderer.GetRenderIterations(), 1, 10); 
         if( ImGui::Button( "Render" ) )
         {
             Render();

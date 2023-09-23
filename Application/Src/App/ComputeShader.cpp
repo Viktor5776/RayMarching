@@ -86,7 +86,7 @@ void ComputeShader::OnResize( int width, int height )
 	assert( SUCCEEDED( hr ) );
 }
 
-void ComputeShader::Dispatch( const Camera& camera, const Scene& scene )
+void ComputeShader::Dispatch( const Camera& camera, const Scene& scene, int renderIterations )
 {
 	//Set Constant buffer
 	struct ConstantBuffer
@@ -95,6 +95,8 @@ void ComputeShader::Dispatch( const Camera& camera, const Scene& scene )
 		Matrix4F inverseView;
 		Vec3F cameraPosition;
 		float pad = 0.0f;
+		int renderIterations;
+		int pad1[3];
 		Scene scene;
 	};
 
@@ -102,6 +104,7 @@ void ComputeShader::Dispatch( const Camera& camera, const Scene& scene )
 	cb.inverseProjection = camera.GetInverseProjection();
 	cb.inverseView = camera.GetInverseView();
 	cb.cameraPosition = camera.GetPosition();
+	cb.renderIterations = renderIterations;
 	cb.scene = scene;
 
 	D3D11_BUFFER_DESC cbDesc = {};

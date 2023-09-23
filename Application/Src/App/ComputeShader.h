@@ -13,7 +13,7 @@ public:
 	ComputeShader( Graphics& gfx, const std::wstring& path );
 	Image& GetImage() { return image; }
 	void OnResize( int width, int height );
-	void Dispatch( const Camera& camera, const Scene& scene );
+	void Dispatch( const Camera& camera, const Scene& scene, int renderIterations );
 private:
 	Graphics& gfx;
 	Image image;

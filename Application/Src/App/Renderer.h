@@ -15,6 +15,8 @@ public:
 	void Render( const Camera& camera, const Scene& scene );
 	void OnResize( int width, int height );
 	Image& GetFinalImage() { return rayMarcherShader.GetImage(); }
+	int& GetRenderIterations() { return renderIterations; }
 private:
+	int renderIterations = 1;
 	ComputeShader rayMarcherShader;
 };
