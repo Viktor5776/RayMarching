@@ -198,20 +198,15 @@ HitPayload MarchRay( Ray ray, int maxIterations, float surfaceDistance, float ma
 namespace RayColor
 {
 
-    float3 RayColor1( inout uint seed, Ray ray )
+    float3 RayColor1( inout uint seed, Ray ray, uint maxIterations, float minDistance, float maxDistance )
     {
         return float3( 0, 0, 0 );
     }
 
-    float3 RayColor2( inout uint seed, Ray ray )
+    float3 RayColor2( inout uint seed, Ray ray, uint maxIterations, float minDistance, float maxDistance )
     {
         uint width, height;
         Result.GetDimensions( width, height );
-    
-    
-        uint maxIterations = 100;
-        float minDistance = 0.01f;
-        float maxDistance = 100.0f;
     
         //Generate small diffrence in ray direction between samples
         float2 delta = float2( Random::RandomFloat( seed ), Random::RandomFloat( seed ) ) / float2( width, height );
@@ -226,7 +221,7 @@ namespace RayColor
             Ray newRay;
             newRay.origin = hit.WorldPosition;
             newRay.dir = direction;
-            return 0.5f * RayColor1( seed, newRay ) + scene.materials[scene.spheres[hit.ObjectIndex].materialIndex].albedo * 0.5f;
+            return 0.5f * RayColor1( seed, newRay, maxIterations, minDistance, maxDistance ) + scene.materials[scene.spheres[hit.ObjectIndex].materialIndex].albedo * 0.5f;
         }
     
     
@@ -235,20 +230,12 @@ namespace RayColor
         float phi = atan2( ray.dir.x, -ray.dir.z ) / -PI * 0.5f;
         float4 color = SkyboxTexture.SampleLevel( sampler_SkyboxTexture, float2( phi, theta ), 0 );
         return color.xyz;
-    
-    
-        //return scene.materials[scene.spheres[hit.ObjectIndex].materialIndex].albedo;
     }
 
-    float3 RayColor3( inout uint seed, Ray ray )
+    float3 RayColor3( inout uint seed, Ray ray, uint maxIterations, float minDistance, float maxDistance )
     {
         uint width, height;
         Result.GetDimensions( width, height );
-    
-    
-        uint maxIterations = 100;
-        float minDistance = 0.01f;
-        float maxDistance = 100.0f;
     
         //Generate small diffrence in ray direction between samples
         float2 delta = float2( Random::RandomFloat( seed ), Random::RandomFloat( seed ) ) / float2( width, height );
@@ -263,7 +250,7 @@ namespace RayColor
             Ray newRay;
             newRay.origin = hit.WorldPosition;
             newRay.dir = direction;
-            return 0.5f * RayColor2( seed, newRay ) + scene.materials[scene.spheres[hit.ObjectIndex].materialIndex].albedo * 0.5f;
+            return 0.5f * RayColor2( seed, newRay, maxIterations, minDistance, maxDistance ) + scene.materials[scene.spheres[hit.ObjectIndex].materialIndex].albedo * 0.5f;
         }
     
     
@@ -272,20 +259,12 @@ namespace RayColor
         float phi = atan2( ray.dir.x, -ray.dir.z ) / -PI * 0.5f;
         float4 color = SkyboxTexture.SampleLevel( sampler_SkyboxTexture, float2( phi, theta ), 0 );
         return color.xyz;
-    
-    
-        //return scene.materials[scene.spheres[hit.ObjectIndex].materialIndex].albedo;
     }
     
-    float3 RayColor4( inout uint seed, Ray ray )
+    float3 RayColor4( inout uint seed, Ray ray, uint maxIterations, float minDistance, float maxDistance )
     {
         uint width, height;
         Result.GetDimensions( width, height );
-    
-    
-        uint maxIterations = 100;
-        float minDistance = 0.01f;
-        float maxDistance = 100.0f;
     
         //Generate small diffrence in ray direction between samples
         float2 delta = float2( Random::RandomFloat( seed ), Random::RandomFloat( seed ) ) / float2( width, height );
@@ -300,7 +279,7 @@ namespace RayColor
             Ray newRay;
             newRay.origin = hit.WorldPosition;
             newRay.dir = direction;
-            return 0.5f * RayColor3( seed, newRay ) + scene.materials[scene.spheres[hit.ObjectIndex].materialIndex].albedo * 0.5f;
+            return 0.5f * RayColor3( seed, newRay, maxIterations, minDistance, maxDistance ) + scene.materials[scene.spheres[hit.ObjectIndex].materialIndex].albedo * 0.5f;
         }
     
     
@@ -311,18 +290,13 @@ namespace RayColor
         return color.xyz;
     
     
-        //return scene.materials[scene.spheres[hit.ObjectIndex].materialIndex].albedo;
+       
     }
     
-    float3 RayColor5( inout uint seed, Ray ray )
+    float3 RayColor5( inout uint seed, Ray ray, uint maxIterations, float minDistance, float maxDistance )
     {
         uint width, height;
         Result.GetDimensions( width, height );
-    
-    
-        uint maxIterations = 100;
-        float minDistance = 0.01f;
-        float maxDistance = 100.0f;
     
         //Generate small diffrence in ray direction between samples
         float2 delta = float2( Random::RandomFloat( seed ), Random::RandomFloat( seed ) ) / float2( width, height );
@@ -337,7 +311,7 @@ namespace RayColor
             Ray newRay;
             newRay.origin = hit.WorldPosition;
             newRay.dir = direction;
-            return 0.5f * RayColor4( seed, newRay ) + scene.materials[scene.spheres[hit.ObjectIndex].materialIndex].albedo * 0.5f;
+            return 0.5f * RayColor4( seed, newRay, maxIterations, minDistance, maxDistance ) + scene.materials[scene.spheres[hit.ObjectIndex].materialIndex].albedo * 0.5f;
         }
     
     
@@ -348,18 +322,13 @@ namespace RayColor
         return color.xyz;
     
     
-        //return scene.materials[scene.spheres[hit.ObjectIndex].materialIndex].albedo;
+       
     }
     
-    float3 RayColor6( inout uint seed, Ray ray )
+    float3 RayColor6( inout uint seed, Ray ray, uint maxIterations, float minDistance, float maxDistance )
     {
         uint width, height;
         Result.GetDimensions( width, height );
-    
-    
-        uint maxIterations = 100;
-        float minDistance = 0.01f;
-        float maxDistance = 100.0f;
     
         //Generate small diffrence in ray direction between samples
         float2 delta = float2( Random::RandomFloat( seed ), Random::RandomFloat( seed ) ) / float2( width, height );
@@ -374,7 +343,7 @@ namespace RayColor
             Ray newRay;
             newRay.origin = hit.WorldPosition;
             newRay.dir = direction;
-            return 0.5f * RayColor5( seed, newRay );
+            return 0.5f * RayColor5( seed, newRay, maxIterations, minDistance, maxDistance );
         }
     
     
@@ -385,18 +354,13 @@ namespace RayColor
         return color.xyz;
     
     
-        //return scene.materials[scene.spheres[hit.ObjectIndex].materialIndex].albedo;
+       
     }
     
-    float3 RayColor7( inout uint seed, Ray ray )
+    float3 RayColor7( inout uint seed, Ray ray, uint maxIterations, float minDistance, float maxDistance )
     {
         uint width, height;
         Result.GetDimensions( width, height );
-    
-    
-        uint maxIterations = 100;
-        float minDistance = 0.01f;
-        float maxDistance = 100.0f;
     
         //Generate small diffrence in ray direction between samples
         float2 delta = float2( Random::RandomFloat( seed ), Random::RandomFloat( seed ) ) / float2( width, height );
@@ -411,7 +375,7 @@ namespace RayColor
             Ray newRay;
             newRay.origin = hit.WorldPosition;
             newRay.dir = direction;
-            return 0.5f * RayColor6( seed, newRay ) + scene.materials[scene.spheres[hit.ObjectIndex].materialIndex].albedo * 0.5f;
+            return 0.5f * RayColor6( seed, newRay, maxIterations, minDistance, maxDistance ) + scene.materials[scene.spheres[hit.ObjectIndex].materialIndex].albedo * 0.5f;
         }
     
     
@@ -422,18 +386,13 @@ namespace RayColor
         return color.xyz;
     
     
-        //return scene.materials[scene.spheres[hit.ObjectIndex].materialIndex].albedo;
+       
     }
     
-    float3 RayColor8( inout uint seed, Ray ray )
+    float3 RayColor8( inout uint seed, Ray ray, uint maxIterations, float minDistance, float maxDistance )
     {
         uint width, height;
         Result.GetDimensions( width, height );
-    
-    
-        uint maxIterations = 100;
-        float minDistance = 0.01f;
-        float maxDistance = 100.0f;
     
         //Generate small diffrence in ray direction between samples
         float2 delta = float2( Random::RandomFloat( seed ), Random::RandomFloat( seed ) ) / float2( width, height );
@@ -448,7 +407,7 @@ namespace RayColor
             Ray newRay;
             newRay.origin = hit.WorldPosition;
             newRay.dir = direction;
-            return 0.5f * RayColor7( seed, newRay ) + scene.materials[scene.spheres[hit.ObjectIndex].materialIndex].albedo * 0.5f;
+            return 0.5f * RayColor7( seed, newRay, maxIterations, minDistance, maxDistance ) + scene.materials[scene.spheres[hit.ObjectIndex].materialIndex].albedo * 0.5f;
         }
     
     
@@ -459,18 +418,13 @@ namespace RayColor
         return color.xyz;
     
     
-        //return scene.materials[scene.spheres[hit.ObjectIndex].materialIndex].albedo;
+       
     }
     
-    float3 RayColor9( inout uint seed, Ray ray )
+    float3 RayColor9( inout uint seed, Ray ray, uint maxIterations, float minDistance, float maxDistance )
     {
         uint width, height;
         Result.GetDimensions( width, height );
-    
-    
-        uint maxIterations = 100;
-        float minDistance = 0.01f;
-        float maxDistance = 100.0f;
     
         //Generate small diffrence in ray direction between samples
         float2 delta = float2( Random::RandomFloat( seed ), Random::RandomFloat( seed ) ) / float2( width, height );
@@ -485,7 +439,7 @@ namespace RayColor
             Ray newRay;
             newRay.origin = hit.WorldPosition;
             newRay.dir = direction;
-            return 0.5f * RayColor8( seed, newRay ) + scene.materials[scene.spheres[hit.ObjectIndex].materialIndex].albedo * 0.5f;
+            return 0.5f * RayColor8( seed, newRay, maxIterations, minDistance, maxDistance ) + scene.materials[scene.spheres[hit.ObjectIndex].materialIndex].albedo * 0.5f;
         }
     
     
@@ -496,18 +450,13 @@ namespace RayColor
         return color.xyz;
     
     
-        //return scene.materials[scene.spheres[hit.ObjectIndex].materialIndex].albedo;
+       
     }
 
-    float3 RayColor( inout uint seed, Ray ray )
+    float3 RayColor( inout uint seed, Ray ray, uint maxIterations, float minDistance, float maxDistance )
     {
         uint width, height;
         Result.GetDimensions( width, height );
-    
-    
-        uint maxIterations = 100;
-        float minDistance = 0.01f;
-        float maxDistance = 100.0f;
     
         //Generate small diffrence in ray direction between samples
         float2 delta = float2( Random::RandomFloat( seed ), Random::RandomFloat( seed ) ) / float2( width, height );
@@ -522,7 +471,7 @@ namespace RayColor
             Ray newRay;
             newRay.origin = hit.WorldPosition;
             newRay.dir = direction;
-            return 0.5f * RayColor9( seed, newRay ) + scene.materials[scene.spheres[hit.ObjectIndex].materialIndex].albedo * 0.5f;
+            return 0.5f * RayColor9( seed, newRay, maxIterations, minDistance, maxDistance ) + scene.materials[scene.spheres[hit.ObjectIndex].materialIndex].albedo * 0.5f;
         }
     
     
@@ -533,7 +482,7 @@ namespace RayColor
         return color.xyz;
     
     
-        //return scene.materials[scene.spheres[hit.ObjectIndex].materialIndex].albedo;
+       
     }
 }
 
@@ -548,8 +497,8 @@ void main( uint3 id : SV_DispatchThreadID )
     
     float2 uv = float2( id.xy ) / float2( width, height );
 
-    uint maxIterations = 100;
-    float minDistance = 0.01f;
+    uint maxIterations = 1000;
+    float minDistance = 0.0001f;
     float maxDistance = 100.0f;
     
     Ray originalRay;
@@ -568,7 +517,7 @@ void main( uint3 id : SV_DispatchThreadID )
     
     for ( int i = 0; i < renderInterations; i++ )
     {
-        accumelatedColor += RayColor::RayColor( seed, originalRay );
+        accumelatedColor += RayColor::RayColor( seed, originalRay, maxIterations, minDistance, maxDistance );
     }
     
     accumelatedColor /= renderInterations;
