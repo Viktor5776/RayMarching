@@ -11,66 +11,25 @@ namespace Hydro
         wnd( 1280, 720, L"Hydro Base" ),
         renderer( wnd.Gfx() ),
         camera( 90.0f, 0.1f, 100.0f ),
-        scene()
-        //scene( 
-        //{
-        //    {.pos{ 0.0f, -100.5f,0.0f }, .radius = 100.0f, .materialIndex = 0 },
-        //    {.pos{ 0.0f,0.0f,0.0f}, .radius = 0.5f, .materialIndex = 1 },
-        //    {.pos{ -1.0f,0.0f,0.0f }, .radius = 0.5f, .materialIndex = 2 },
-        //    {.pos{ 1.0f,0.0f,0.0f}, .radius = 0.5f, .materialIndex = 3 },
-        //}, 
-        //{
-        //    {.albedo{ 0.8f, 0.8f,0.0f}, .metalRoughness = 0.0f, .isMetal = false },
-        //    {.albedo{ 0.7f, 0.3f,0.3f}, .metalRoughness = 0.0f, .isMetal = false },
-        //    {.albedo{ 0.8f, 0.8f,0.8f}, .metalRoughness = 0.3f, .isMetal = true  },
-        //    {.albedo{ 0.8f, 0.6f,0.2f}, .metalRoughness = 1.0f, .isMetal = true  },
-        //})
+        scene( 
+        {
+            {.pos{ 0.0f, -100.5f,0.0f }, .radius = 100.0f, .materialIndex = 0 },
+            {.pos{ 0.0f,0.0f,0.0f}, .radius = 0.5f, .materialIndex = 1 },
+            {.pos{ -1.0f,0.0f,0.0f }, .radius = 0.5f, .materialIndex = 2 },
+            {.pos{ 1.0f,0.0f,0.0f}, .radius = 0.5f, .materialIndex = 3 },
+        }, 
+        {
+            {.albedo{ 0.8f, 0.8f,0.0f}, .metalRoughness = 0.0f, .isMetal = false },
+            {.albedo{ 0.7f, 0.3f,0.3f}, .metalRoughness = 0.0f, .isMetal = false },
+            {.albedo{ 0.8f, 0.8f,0.8f}, .metalRoughness = 0.3f, .isMetal = true  },
+            {.albedo{ 0.8f, 0.6f,0.2f}, .metalRoughness = 1.0f, .isMetal = true  },
+        })
 	{
         comboBoxIndexObject = 0;
         comboBoxIndexMaterial = 0;
         //Init Scene
         scene.lightDir = { -1.0f,-1.0f,-1.0f };
         scene.ambient = 0.2f;
-
-        scene.objectCount = 70;
-        scene.materialCount = 70;
-
-        scene.spheres[0] = { { 0.0f, -1000.f,0.0f }, 1000.0f, 0 };
-        scene.materials[0] = { { 0.5f, 0.5f,0.5f }, 0.0f, false };
-
-        scene.spheres[1] = { { 1, 1, 3 }, 1.0f, 1 };
-        scene.materials[1] = { { 0.4, 0.2, 0.1 }, 0.0f, false };
-
-        scene.spheres[2] = { { 4, 1, 0 }, 1.0f, 2 };
-        scene.materials[2] = { { 0.7, 0.6, 0.5 }, 0.0f, true };
-
-        int i = 2;
-
-        for( int a = 0; a < 8; a++ ) {
-            for( int b = 0; b < 8; b++ ) {
-                i++;
-                auto choose_mat = Hydro::Random::Float(0.0f,-1.0f);
-                Vec3F center( a + 0.9 * Hydro::Random::Float( 0.0f, -1.0f ), 0.2, b + 0.9 * Hydro::Random::Float( 0.0f, -1.0f ) );
-
-                if( (center - Vec3F( 4, 0.2, 0 )).Magnitude() > 0.9 ) {
-                    
-                    if( choose_mat < 0.88 ) {
-                        // diffuse
-                        auto albedo = Random::Vec3(0.0f,1.0f) * Random::Vec3( 0.0f, 1.0f );
-                        scene.spheres[i] = { center, 0.2, i };
-                        scene.materials[i] = Material{ .albedo = albedo, .metalRoughness = 0.0f, .isMetal = 0 };
-                    }
-                    else {
-                        // metal
-                        auto albedo = Random::Vec3( 0.5f, 1.0f );
-                        auto fuzz = Random::Float( 0.0f, 0.5f );
-                        scene.spheres[i] = { center, 0.2, i };
-                        scene.materials[i] = Material{ .albedo = albedo, .metalRoughness = fuzz, .isMetal = 1 };
-                    }
-                }
-            }
-        }
-
 	}
 
 	App::~App()

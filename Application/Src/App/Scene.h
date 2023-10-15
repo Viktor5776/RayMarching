@@ -56,7 +56,7 @@ struct Material
     }
 };
 
-static constexpr int MAX_OBJECTS = 70;
+static constexpr int MAX_OBJECTS = 128;
 
 struct Scene
 {
