@@ -17,6 +17,6 @@ public:
 	Image& GetFinalImage() { return rayMarcherShader.GetImage(); }
 	int& GetRenderIterations() { return renderIterations; }
 private:
-	int renderIterations = 8;
+	int renderIterations = 1;
 	ComputeShader rayMarcherShader;
 };

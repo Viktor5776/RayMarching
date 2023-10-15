@@ -28,6 +28,11 @@ namespace Hydro
 			return (float)s_Distribution( s_RandomEngine ) / (float)(std::numeric_limits<uint32_t>::max)();
 		}
 
+		static float Float( float min, float max )
+		{
+			return min + Float() * (max - min);
+		}
+
 		static Vec3F Vec3()
 		{
 			return Vec3F( Float(), Float(), Float() );

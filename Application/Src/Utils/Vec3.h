@@ -252,6 +252,11 @@ namespace Hydro
 		return Vec3T<T>( lhs.x * rhs, lhs.y * rhs, lhs.z * rhs );
 	}
 	template<typename T>
+	Vec3T<T> operator*( Vec3T<T> rhs, Vec3T<T> lhs )
+	{
+		return Vec3T<T>( lhs.x * rhs.x, lhs.y * rhs.y, lhs.z * rhs.z );
+	}
+	template<typename T>
 	Vec3T<T> operator-( const Vec3T<T> lhs, const Vec3T<T> rhs )
 	{
 		return Vec3T<T>( lhs.x - rhs.x, lhs.y - rhs.y, lhs.z - rhs.z );

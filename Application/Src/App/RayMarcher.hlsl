@@ -91,6 +91,7 @@ struct Sphere
     float3 center;
     float radius;
     int materialIndex;
+    int3 padding;
 };
 
 struct Material
@@ -98,12 +99,13 @@ struct Material
     float3 albedo;
     
     //Options
-    bool isMetal;
     float metalRoughness;
+    int isMetal;
+    int3 padding;
     
     bool scatter( inout Ray ray_in, inout HitPayload hit, inout float3 attenuation, inout Ray scattered, inout uint seed )
     {
-        if( !isMetal )
+        if( isMetal == 0)
         {
             float3 scatter_direction = hit.WorldNormal + Random::random_unit_vector( seed );
             
@@ -118,7 +120,7 @@ struct Material
             return true;
         }
         
-        if( isMetal )
+        if( isMetal == 1)
         {
             float3 reflected = reflect( normalize( ray_in.dir ), hit.WorldNormal );
             scattered.origin = hit.WorldPosition + reflected * 0.001f;
@@ -133,12 +135,16 @@ struct Material
     }
 };
 
+static const int MAX_OBJECTS = 70;
+
 struct Scene
 {
     float3 lightDir;
     float ambient;
-    Sphere spheres[10];
-    Material materials[10];
+    int objectCount;
+    int materialCount;
+    Sphere spheres[MAX_OBJECTS];
+    Material materials[MAX_OBJECTS];
 };
 
 RWTexture2D<float4> Result : register( u0 );
@@ -182,7 +188,7 @@ ObjectDistance signedDistanceScene( float3 p )
     result.distance = 10000.0f;
     result.objectIndex = -1;
     
-    for ( int i = 0; i < 10; i++ )
+    for ( int i = 0; i < scene.objectCount; i++ )
     {
         if ( scene.spheres[i].radius > 0.0f )
         {
