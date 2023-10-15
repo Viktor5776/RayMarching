@@ -28,8 +28,12 @@ struct Sphere
 struct Material
 {
     Vec3F albedo;
-    float padding;
-    //Emission
+    
+    //Option
+    bool isMetal = false;
+    float metalRoughness;
+
+    Vec3F padding;
 
     void SpawnControlWindow( int id )
     {
@@ -37,6 +41,9 @@ struct Material
 
         ImGui::Text( "Albedo" );
         ImGui::ColorEdit3( "Albedo",&albedo.x );
+        ImGui::Checkbox( "Metal",&isMetal );
+        ImGui::Text( "Metal Roughness" );
+		ImGui::DragFloat( "metalRoughness",&metalRoughness,0.02f,0.0f,1.0f );
         ImGui::Separator();
     }
 };

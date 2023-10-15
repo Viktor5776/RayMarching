@@ -16,10 +16,17 @@ namespace Hydro
         //Init Scene
         scene.lightDir = { -1.0f,-1.0f,-1.0f };
         scene.ambient = 0.2f;
-        scene.spheres[0] = { .pos{ 0.0f,0.0f,0.0f }, .radius = 1.0f, .materialIndex = 0 };
-        scene.spheres[1] = { .pos{0.0f,-101.0f,0.0f}, .radius = 100.0f, .materialIndex = 1 };
-        scene.materials[0] = { { 1.0f, 0.0f,0.0f} };
-        scene.materials[1] = { { 0.1f, 0.1f,0.1f} };
+
+
+        scene.spheres[0] = { .pos{ 0.0f, -100.5f,0.0f }, .radius = 100.0f, .materialIndex = 0 };
+        scene.spheres[1] = { .pos{ 0.0f,0.0f,0.0f}, .radius = 0.5f, .materialIndex = 1 };
+        scene.spheres[2] = { .pos{ -1.0f,0.0f,0.0f }, .radius = 0.5f, .materialIndex = 2 };
+        scene.spheres[3] = { .pos{ 1.0f,0.0f,0.0f}, .radius = 0.5f, .materialIndex = 3 };
+
+        scene.materials[0] = { .albedo{ 0.8f, 0.8f,0.0f}, .isMetal = false };
+        scene.materials[1] = { .albedo{ 0.7f, 0.3f,0.3f}, .isMetal = false };
+        scene.materials[2] = { .albedo{ 0.8f, 0.8f,0.8f}, .isMetal = true, .metalRoughness = 0.3f };
+        scene.materials[3] = { .albedo{ 0.8f, 0.6f,0.2f}, .isMetal = true, .metalRoughness = 1.0f };
 	}
 
 	App::~App()

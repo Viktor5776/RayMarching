@@ -1,3 +1,91 @@
+//Random
+namespace Random
+{
+
+    uint PCG_Hash( uint input )
+    {
+        uint state = input * 747796405u + 2891336453u;
+        uint word = ((state >> ((state >> 28u) + 4u)) ^ state) * 277803737u;
+        return (word >> 22u) ^ word;
+    }
+
+    float RandomFloat( inout uint seed )
+    {
+        seed = PCG_Hash( seed );
+    // [0, 1)
+        return ( float ) seed / ( float ) 0xffffffffu;
+    }
+
+    float RandomFloat( inout uint seed, float min, float max )
+    {
+        return RandomFloat( seed ) * (max - min) + min;
+    }
+
+    float3 randomVector3( inout uint seed )
+    {
+        return float3( RandomFloat( seed ), RandomFloat( seed ), RandomFloat( seed ) );
+    }
+
+    float3 randomVector3( inout uint seed, float min, float max )
+    {
+        return float3( RandomFloat( seed, min, max ), RandomFloat( seed, min, max ), RandomFloat( seed, min, max ) );
+    }
+
+    float3 random_in_unit_sphere( inout uint seed )
+    {
+        while ( true )
+        {
+            float3 p = randomVector3( seed, -1.0f, 1.0f );
+            if ( length( p ) < 1.0f ) 
+                return p;
+        }
+        
+        return float3( 0.0f, 0.0f, 0.0f );
+    }
+
+    float3 random_unit_vector( inout uint seed )
+    {
+        return normalize( random_in_unit_sphere( seed ) );
+    }
+
+    float3 random_on_hemisphere( inout uint seed, float3 normal )
+    {
+        float3 on_unit_sphere = random_unit_vector( seed );
+        if ( dot( on_unit_sphere, normal ) > 0.0f )
+            return on_unit_sphere;
+        else
+            return -on_unit_sphere;
+    }
+
+}
+
+//Utility
+bool near_zero( float3 v )
+{
+    const float s = 1e-8;
+    return ( abs( v.x ) < s ) && ( abs( v.y ) < s ) && ( abs( v.z ) < s );
+}
+
+float3 reflect( float3 v, float3 n )
+{
+    return v - 2.0f * dot( v, n ) * n;
+}
+
+//Ray marcher
+struct Ray
+{
+    float3 dir;
+    float3 origin;
+};
+
+struct HitPayload
+{
+    float HitDistance;
+    float3 WorldPosition;
+    float3 WorldNormal;
+    int ObjectIndex;
+};
+
 struct Sphere
 {
     float3 center;
@@ -8,6 +96,41 @@ struct Sphere
 struct Material
 {
     float3 albedo;
+    
+    //Options
+    bool isMetal;
+    float metalRoughness;
+    
+    bool scatter( inout Ray ray_in, inout HitPayload hit, inout float3 attenuation, inout Ray scattered, inout uint seed )
+    {
+        if( !isMetal )
+        {
+            float3 scatter_direction = hit.WorldNormal + Random::random_unit_vector( seed );
+            
+            if ( near_zero( scatter_direction ) )
+                scatter_direction = hit.WorldNormal;
+            
+            scattered.origin = hit.WorldPosition + scatter_direction * 0.001f;
+            scattered.dir = scatter_direction;
+            
+            attenuation = albedo;
+        
+            return true;
+        }
+        
+        if( isMetal )
+        {
+            float3 reflected = reflect( normalize( ray_in.dir ), hit.WorldNormal );
+            scattered.origin = hit.WorldPosition + reflected * 0.001f;
+            scattered.dir = reflected + metalRoughness * Random::random_unit_vector( seed );
+            
+            attenuation = albedo;
+            
+            return (dot( scattered.dir, hit.WorldNormal ) > 0.0f);
+        }
+        
+        return false;
+    }
 };
 
 struct Scene
@@ -30,65 +153,7 @@ Scene scene : register( c11 );
 
 static const float PI = 3.14159265f;
 
-namespace Random 
-{
 
-uint PCG_Hash( uint input )
-{
-    uint state = input * 747796405u + 2891336453u;
-    uint word = ((state >> ((state >> 28u) + 4u)) ^ state) * 277803737u;
-    return (word >> 22u) ^ word;
-}
-
-float RandomFloat( inout uint seed )
-{
-    seed = PCG_Hash( seed );
-    // [0, 1)
-    return (float) seed / (float)0xffffffffu;
-}
-
-float RandomFloat( inout uint seed, float min, float max )
-{
-    return RandomFloat( seed ) * ( max - min ) + min;
-}
-
-float3 randomVector3( inout uint seed )
-{
-    return float3( RandomFloat( seed ), RandomFloat( seed ), RandomFloat( seed ) );
-}
-
-float3 randomVector3( inout uint seed, float min, float max )
-{
-    return float3( RandomFloat( seed, min, max ), RandomFloat( seed, min, max ), RandomFloat( seed, min, max ) );
-}
-
-float3 random_in_unit_sphere( inout uint seed )
-{
-    while( true )
-    {
-        float3 p = randomVector3( seed, -1.0f, 1.0f );
-        if ( length(p) < 1.0f ) 
-            return p;
-    }
-        
-    return float3( 0.0f,0.0f,0.0f );
-}
-
-float3 random_unit_vector( inout uint seed )
-{
-    return normalize( random_in_unit_sphere( seed ) );
-}
-
-float3 random_on_hemisphere( inout uint seed, float3 normal )
-{
-    float3 on_unit_sphere = random_unit_vector( seed );
-    if ( dot( on_unit_sphere, normal ) > 0.0f )
-        return on_unit_sphere;
-    else
-        return -on_unit_sphere;
-}
-
-}
 
 float linear_to_gamma( float linear_component )
 {
@@ -133,20 +198,6 @@ ObjectDistance signedDistanceScene( float3 p )
     
     return result;
 }
-
-struct Ray
-{
-    float3 dir;
-    float3 origin;
-};
-
-struct HitPayload
-{
-    float HitDistance;
-    float3 WorldPosition;
-    float3 WorldNormal;
-    int ObjectIndex;
-};
 
 HitPayload MarchRay( Ray ray, int maxIterations, float surfaceDistance, float maxDistance )
 {
@@ -214,21 +265,24 @@ namespace RayColor
         
         HitPayload hit = MarchRay( ray, maxIterations, minDistance, maxDistance );
     
-    
         if ( hit.HitDistance > 0.0f )
         {
-            float3 direction = hit.WorldNormal + Random::random_unit_vector( seed );
-            Ray newRay;
-            newRay.origin = hit.WorldPosition;
-            newRay.dir = direction;
-            return 0.5f * RayColor1( seed, newRay, maxIterations, minDistance, maxDistance ) + scene.materials[scene.spheres[hit.ObjectIndex].materialIndex].albedo * 0.5f;
+            Ray scattered;
+            float3 attenuation;
+            if ( scene.materials[scene.spheres[hit.ObjectIndex].materialIndex].scatter( ray, hit, attenuation, scattered, seed ) )
+            {
+                return attenuation * RayColor1( seed, scattered, maxIterations, minDistance, maxDistance );
+            }
+            else
+            {
+                return float3( 0.0f, 0.0f, 0.0f );
+            }
         }
-    
     
         //Skybox
         float theta = acos( ray.dir.y ) / -PI;
         float phi = atan2( ray.dir.x, -ray.dir.z ) / -PI * 0.5f;
-        float4 color = SkyboxTexture.SampleLevel( sampler_SkyboxTexture, float2( phi, theta ), 0 );
+        float4 color = SkyboxTexture.SampleLevel( sampler_SkyboxTexture, float2( phi, -theta ), 0 );
         return color.xyz;
     }
 
@@ -243,21 +297,24 @@ namespace RayColor
         
         HitPayload hit = MarchRay( ray, maxIterations, minDistance, maxDistance );
     
-    
         if ( hit.HitDistance > 0.0f )
         {
-            float3 direction = hit.WorldNormal + Random::random_unit_vector( seed );
-            Ray newRay;
-            newRay.origin = hit.WorldPosition;
-            newRay.dir = direction;
-            return 0.5f * RayColor2( seed, newRay, maxIterations, minDistance, maxDistance ) + scene.materials[scene.spheres[hit.ObjectIndex].materialIndex].albedo * 0.5f;
+            Ray scattered;
+            float3 attenuation;
+            if ( scene.materials[scene.spheres[hit.ObjectIndex].materialIndex].scatter( ray, hit, attenuation, scattered, seed ) )
+            {
+                return attenuation * RayColor2( seed, scattered, maxIterations, minDistance, maxDistance );
+            }
+            else
+            {
+                return float3( 0.0f, 0.0f, 0.0f );
+            }
         }
-    
     
         //Skybox
         float theta = acos( ray.dir.y ) / -PI;
         float phi = atan2( ray.dir.x, -ray.dir.z ) / -PI * 0.5f;
-        float4 color = SkyboxTexture.SampleLevel( sampler_SkyboxTexture, float2( phi, theta ), 0 );
+        float4 color = SkyboxTexture.SampleLevel( sampler_SkyboxTexture, float2( phi, -theta ), 0 );
         return color.xyz;
     }
     
@@ -272,25 +329,25 @@ namespace RayColor
         
         HitPayload hit = MarchRay( ray, maxIterations, minDistance, maxDistance );
     
-    
         if ( hit.HitDistance > 0.0f )
         {
-            float3 direction = hit.WorldNormal + Random::random_unit_vector( seed );
-            Ray newRay;
-            newRay.origin = hit.WorldPosition;
-            newRay.dir = direction;
-            return 0.5f * RayColor3( seed, newRay, maxIterations, minDistance, maxDistance ) + scene.materials[scene.spheres[hit.ObjectIndex].materialIndex].albedo * 0.5f;
+            Ray scattered;
+            float3 attenuation;
+            if ( scene.materials[scene.spheres[hit.ObjectIndex].materialIndex].scatter( ray, hit, attenuation, scattered, seed ) )
+            {
+                return attenuation * RayColor3( seed, scattered, maxIterations, minDistance, maxDistance );
+            }
+            else
+            {
+                return float3( 0.0f, 0.0f, 0.0f );
+            }
         }
-    
     
         //Skybox
         float theta = acos( ray.dir.y ) / -PI;
         float phi = atan2( ray.dir.x, -ray.dir.z ) / -PI * 0.5f;
-        float4 color = SkyboxTexture.SampleLevel( sampler_SkyboxTexture, float2( phi, theta ), 0 );
+        float4 color = SkyboxTexture.SampleLevel( sampler_SkyboxTexture, float2( phi, -theta ), 0 );
         return color.xyz;
-    
-    
-       
     }
     
     float3 RayColor5( inout uint seed, Ray ray, uint maxIterations, float minDistance, float maxDistance )
@@ -304,25 +361,25 @@ namespace RayColor
         
         HitPayload hit = MarchRay( ray, maxIterations, minDistance, maxDistance );
     
-    
         if ( hit.HitDistance > 0.0f )
         {
-            float3 direction = hit.WorldNormal + Random::random_unit_vector( seed );
-            Ray newRay;
-            newRay.origin = hit.WorldPosition;
-            newRay.dir = direction;
-            return 0.5f * RayColor4( seed, newRay, maxIterations, minDistance, maxDistance ) + scene.materials[scene.spheres[hit.ObjectIndex].materialIndex].albedo * 0.5f;
+            Ray scattered;
+            float3 attenuation;
+            if ( scene.materials[scene.spheres[hit.ObjectIndex].materialIndex].scatter( ray, hit, attenuation, scattered, seed ) )
+            {
+                return attenuation * RayColor4( seed, scattered, maxIterations, minDistance, maxDistance );
+            }
+            else
+            {
+                return float3( 0.0f, 0.0f, 0.0f );
+            }
         }
-    
     
         //Skybox
         float theta = acos( ray.dir.y ) / -PI;
         float phi = atan2( ray.dir.x, -ray.dir.z ) / -PI * 0.5f;
-        float4 color = SkyboxTexture.SampleLevel( sampler_SkyboxTexture, float2( phi, theta ), 0 );
+        float4 color = SkyboxTexture.SampleLevel( sampler_SkyboxTexture, float2( phi, -theta ), 0 );
         return color.xyz;
-    
-    
-       
     }
     
     float3 RayColor6( inout uint seed, Ray ray, uint maxIterations, float minDistance, float maxDistance )
@@ -336,25 +393,25 @@ namespace RayColor
         
         HitPayload hit = MarchRay( ray, maxIterations, minDistance, maxDistance );
     
-    
         if ( hit.HitDistance > 0.0f )
         {
-            float3 direction = hit.WorldNormal + Random::random_unit_vector( seed );
-            Ray newRay;
-            newRay.origin = hit.WorldPosition;
-            newRay.dir = direction;
-            return 0.5f * RayColor5( seed, newRay, maxIterations, minDistance, maxDistance );
+            Ray scattered;
+            float3 attenuation;
+            if ( scene.materials[scene.spheres[hit.ObjectIndex].materialIndex].scatter( ray, hit, attenuation, scattered, seed ) )
+            {
+                return attenuation * RayColor5( seed, scattered, maxIterations, minDistance, maxDistance );
+            }
+            else
+            {
+                return float3( 0.0f, 0.0f, 0.0f );
+            }
         }
-    
     
         //Skybox
         float theta = acos( ray.dir.y ) / -PI;
         float phi = atan2( ray.dir.x, -ray.dir.z ) / -PI * 0.5f;
-        float4 color = SkyboxTexture.SampleLevel( sampler_SkyboxTexture, float2( phi, theta ), 0 );
+        float4 color = SkyboxTexture.SampleLevel( sampler_SkyboxTexture, float2( phi, -theta ), 0 );
         return color.xyz;
-    
-    
-       
     }
     
     float3 RayColor7( inout uint seed, Ray ray, uint maxIterations, float minDistance, float maxDistance )
@@ -368,25 +425,25 @@ namespace RayColor
         
         HitPayload hit = MarchRay( ray, maxIterations, minDistance, maxDistance );
     
-    
         if ( hit.HitDistance > 0.0f )
         {
-            float3 direction = hit.WorldNormal + Random::random_unit_vector( seed );
-            Ray newRay;
-            newRay.origin = hit.WorldPosition;
-            newRay.dir = direction;
-            return 0.5f * RayColor6( seed, newRay, maxIterations, minDistance, maxDistance ) + scene.materials[scene.spheres[hit.ObjectIndex].materialIndex].albedo * 0.5f;
+            Ray scattered;
+            float3 attenuation;
+            if ( scene.materials[scene.spheres[hit.ObjectIndex].materialIndex].scatter( ray, hit, attenuation, scattered, seed ) )
+            {
+                return attenuation * RayColor6( seed, scattered, maxIterations, minDistance, maxDistance );
+            }
+            else
+            {
+                return float3( 0.0f, 0.0f, 0.0f );
+            }
         }
-    
     
         //Skybox
         float theta = acos( ray.dir.y ) / -PI;
         float phi = atan2( ray.dir.x, -ray.dir.z ) / -PI * 0.5f;
-        float4 color = SkyboxTexture.SampleLevel( sampler_SkyboxTexture, float2( phi, theta ), 0 );
+        float4 color = SkyboxTexture.SampleLevel( sampler_SkyboxTexture, float2( phi, -theta ), 0 );
         return color.xyz;
-    
-    
-       
     }
     
     float3 RayColor8( inout uint seed, Ray ray, uint maxIterations, float minDistance, float maxDistance )
@@ -400,25 +457,25 @@ namespace RayColor
         
         HitPayload hit = MarchRay( ray, maxIterations, minDistance, maxDistance );
     
-    
         if ( hit.HitDistance > 0.0f )
         {
-            float3 direction = hit.WorldNormal + Random::random_unit_vector( seed );
-            Ray newRay;
-            newRay.origin = hit.WorldPosition;
-            newRay.dir = direction;
-            return 0.5f * RayColor7( seed, newRay, maxIterations, minDistance, maxDistance ) + scene.materials[scene.spheres[hit.ObjectIndex].materialIndex].albedo * 0.5f;
+            Ray scattered;
+            float3 attenuation;
+            if ( scene.materials[scene.spheres[hit.ObjectIndex].materialIndex].scatter( ray, hit, attenuation, scattered, seed ) )
+            {
+                return attenuation * RayColor7( seed, scattered, maxIterations, minDistance, maxDistance );
+            }
+            else
+            {
+                return float3( 0.0f, 0.0f, 0.0f );
+            }
         }
-    
     
         //Skybox
         float theta = acos( ray.dir.y ) / -PI;
         float phi = atan2( ray.dir.x, -ray.dir.z ) / -PI * 0.5f;
-        float4 color = SkyboxTexture.SampleLevel( sampler_SkyboxTexture, float2( phi, theta ), 0 );
+        float4 color = SkyboxTexture.SampleLevel( sampler_SkyboxTexture, float2( phi, -theta ), 0 );
         return color.xyz;
-    
-    
-       
     }
     
     float3 RayColor9( inout uint seed, Ray ray, uint maxIterations, float minDistance, float maxDistance )
@@ -432,27 +489,27 @@ namespace RayColor
         
         HitPayload hit = MarchRay( ray, maxIterations, minDistance, maxDistance );
     
-    
         if ( hit.HitDistance > 0.0f )
         {
-            float3 direction = hit.WorldNormal + Random::random_unit_vector( seed );
-            Ray newRay;
-            newRay.origin = hit.WorldPosition;
-            newRay.dir = direction;
-            return 0.5f * RayColor8( seed, newRay, maxIterations, minDistance, maxDistance ) + scene.materials[scene.spheres[hit.ObjectIndex].materialIndex].albedo * 0.5f;
+            Ray scattered;
+            float3 attenuation;
+            if ( scene.materials[scene.spheres[hit.ObjectIndex].materialIndex].scatter( ray, hit, attenuation, scattered, seed ) )
+            {
+                return attenuation * RayColor8( seed, scattered, maxIterations, minDistance, maxDistance );
+            }
+            else
+            {
+                return float3( 0.0f, 0.0f, 0.0f );
+            }
         }
     
-    
-        //Skybox
+        //Skybox        
         float theta = acos( ray.dir.y ) / -PI;
         float phi = atan2( ray.dir.x, -ray.dir.z ) / -PI * 0.5f;
-        float4 color = SkyboxTexture.SampleLevel( sampler_SkyboxTexture, float2( phi, theta ), 0 );
+        float4 color = SkyboxTexture.SampleLevel( sampler_SkyboxTexture, float2( phi, -theta ), 0 );
         return color.xyz;
-    
-    
-       
     }
-
+    
     float3 RayColor( inout uint seed, Ray ray, uint maxIterations, float minDistance, float maxDistance )
     {
         uint width, height;
@@ -464,25 +521,25 @@ namespace RayColor
         
         HitPayload hit = MarchRay( ray, maxIterations, minDistance, maxDistance );
     
-    
         if ( hit.HitDistance > 0.0f )
         {
-            float3 direction = hit.WorldNormal + Random::random_unit_vector( seed );
-            Ray newRay;
-            newRay.origin = hit.WorldPosition;
-            newRay.dir = direction;
-            return 0.5f * RayColor9( seed, newRay, maxIterations, minDistance, maxDistance ) + scene.materials[scene.spheres[hit.ObjectIndex].materialIndex].albedo * 0.5f;
+            Ray scattered;
+            float3 attenuation;
+            if( scene.materials[scene.spheres[hit.ObjectIndex].materialIndex].scatter( ray, hit, attenuation, scattered, seed ) )
+            {
+                return attenuation * RayColor9( seed, scattered, maxIterations, minDistance, maxDistance );
+            }
+            else
+            {
+                return float3( 0.0f, 0.0f, 0.0f );
+            }
         }
-    
     
         //Skybox
         float theta = acos( ray.dir.y ) / -PI;
         float phi = atan2( ray.dir.x, -ray.dir.z ) / -PI * 0.5f;
-        float4 color = SkyboxTexture.SampleLevel( sampler_SkyboxTexture, float2( phi, theta ), 0 );
+        float4 color = SkyboxTexture.SampleLevel( sampler_SkyboxTexture, float2( phi, -theta ), 0 );
         return color.xyz;
-    
-    
-       
     }
 }
 
@@ -523,7 +580,7 @@ void main( uint3 id : SV_DispatchThreadID )
     accumelatedColor /= renderInterations;
     
     //Maybe use this?
-    //accumelatedColor = linear_to_gamma( accumelatedColor );
+    accumelatedColor = linear_to_gamma( accumelatedColor );
     
     Result[id.xy] = float4( accumelatedColor, 1.0f );
 }
