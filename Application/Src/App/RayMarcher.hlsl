@@ -86,6 +86,15 @@ struct HitPayload
     int ObjectIndex;
 };
 
+
+struct Object
+{
+    int id;
+    int materialIndex;
+    int active;
+    int propertys[15];
+};
+
 struct Sphere
 {
     float3 center;
@@ -93,6 +102,18 @@ struct Sphere
     int materialIndex;
     int3 padding;
 };
+
+Sphere SphereFromObject( Object obj )
+{
+    Sphere sphere;
+    
+    sphere.center = float3(asfloat(obj.propertys[0]), asfloat(obj.propertys[1]), asfloat(obj.propertys[2]));
+    sphere.radius = asfloat(obj.propertys[3]);
+    
+    sphere.materialIndex = obj.materialIndex;
+    
+    return sphere;
+}
 
 struct Material
 {
@@ -135,7 +156,7 @@ struct Material
     }
 };
 
-static const int MAX_OBJECTS = 128;
+static const int MAX_OBJECTS = 64;
 
 struct Scene
 {
@@ -143,7 +164,7 @@ struct Scene
     float ambient;
     int objectCount;
     int materialCount;
-    Sphere spheres[MAX_OBJECTS];
+    Object objects[MAX_OBJECTS];
     Material materials[MAX_OBJECTS];
 };
 
@@ -190,9 +211,21 @@ ObjectDistance signedDistanceScene( float3 p )
     
     for ( int i = 0; i < scene.objectCount; i++ )
     {
-        if ( scene.spheres[i].radius > 0.0f )
+        if ( scene.objects[i].active == 1 )
         {
-            float tempDistance = signedDistanceSphere(p, scene.spheres[i].center, scene.spheres[i].radius);
+            float tempDistance;
+            
+            
+            //Select object
+            switch (scene.objects[i].id)
+            {
+                case 0:
+                {
+                    Sphere sphere = SphereFromObject(scene.objects[i]);    
+                    tempDistance = signedDistanceSphere(p, sphere.center, sphere.radius);
+                    break;
+                }
+            }
             
             if( tempDistance < result.distance )
             {
@@ -275,7 +308,7 @@ namespace RayColor
         {
             Ray scattered;
             float3 attenuation;
-            if ( scene.materials[scene.spheres[hit.ObjectIndex].materialIndex].scatter( ray, hit, attenuation, scattered, seed ) )
+            if ( scene.materials[scene.objects[hit.ObjectIndex].materialIndex].scatter( ray, hit, attenuation, scattered, seed ) )
             {
                 return attenuation * RayColor1( seed, scattered, maxIterations, minDistance, maxDistance );
             }
@@ -307,7 +340,7 @@ namespace RayColor
         {
             Ray scattered;
             float3 attenuation;
-            if ( scene.materials[scene.spheres[hit.ObjectIndex].materialIndex].scatter( ray, hit, attenuation, scattered, seed ) )
+            if ( scene.materials[scene.objects[hit.ObjectIndex].materialIndex].scatter( ray, hit, attenuation, scattered, seed ) )
             {
                 return attenuation * RayColor2( seed, scattered, maxIterations, minDistance, maxDistance );
             }
@@ -339,7 +372,7 @@ namespace RayColor
         {
             Ray scattered;
             float3 attenuation;
-            if ( scene.materials[scene.spheres[hit.ObjectIndex].materialIndex].scatter( ray, hit, attenuation, scattered, seed ) )
+            if ( scene.materials[scene.objects[hit.ObjectIndex].materialIndex].scatter( ray, hit, attenuation, scattered, seed ) )
             {
                 return attenuation * RayColor3( seed, scattered, maxIterations, minDistance, maxDistance );
             }
@@ -371,7 +404,7 @@ namespace RayColor
         {
             Ray scattered;
             float3 attenuation;
-            if ( scene.materials[scene.spheres[hit.ObjectIndex].materialIndex].scatter( ray, hit, attenuation, scattered, seed ) )
+            if ( scene.materials[scene.objects[hit.ObjectIndex].materialIndex].scatter( ray, hit, attenuation, scattered, seed ) )
             {
                 return attenuation * RayColor4( seed, scattered, maxIterations, minDistance, maxDistance );
             }
@@ -403,7 +436,7 @@ namespace RayColor
         {
             Ray scattered;
             float3 attenuation;
-            if ( scene.materials[scene.spheres[hit.ObjectIndex].materialIndex].scatter( ray, hit, attenuation, scattered, seed ) )
+            if ( scene.materials[scene.objects[hit.ObjectIndex].materialIndex].scatter( ray, hit, attenuation, scattered, seed ) )
             {
                 return attenuation * RayColor5( seed, scattered, maxIterations, minDistance, maxDistance );
             }
@@ -435,7 +468,7 @@ namespace RayColor
         {
             Ray scattered;
             float3 attenuation;
-            if ( scene.materials[scene.spheres[hit.ObjectIndex].materialIndex].scatter( ray, hit, attenuation, scattered, seed ) )
+            if ( scene.materials[scene.objects[hit.ObjectIndex].materialIndex].scatter( ray, hit, attenuation, scattered, seed ) )
             {
                 return attenuation * RayColor6( seed, scattered, maxIterations, minDistance, maxDistance );
             }
@@ -467,7 +500,7 @@ namespace RayColor
         {
             Ray scattered;
             float3 attenuation;
-            if ( scene.materials[scene.spheres[hit.ObjectIndex].materialIndex].scatter( ray, hit, attenuation, scattered, seed ) )
+            if ( scene.materials[scene.objects[hit.ObjectIndex].materialIndex].scatter( ray, hit, attenuation, scattered, seed ) )
             {
                 return attenuation * RayColor7( seed, scattered, maxIterations, minDistance, maxDistance );
             }
@@ -499,7 +532,7 @@ namespace RayColor
         {
             Ray scattered;
             float3 attenuation;
-            if ( scene.materials[scene.spheres[hit.ObjectIndex].materialIndex].scatter( ray, hit, attenuation, scattered, seed ) )
+            if ( scene.materials[scene.objects[hit.ObjectIndex].materialIndex].scatter( ray, hit, attenuation, scattered, seed ) )
             {
                 return attenuation * RayColor8( seed, scattered, maxIterations, minDistance, maxDistance );
             }
@@ -531,7 +564,7 @@ namespace RayColor
         {
             Ray scattered;
             float3 attenuation;
-            if( scene.materials[scene.spheres[hit.ObjectIndex].materialIndex].scatter( ray, hit, attenuation, scattered, seed ) )
+            if( scene.materials[scene.objects[hit.ObjectIndex].materialIndex].scatter( ray, hit, attenuation, scattered, seed ) )
             {
                 return attenuation * RayColor9( seed, scattered, maxIterations, minDistance, maxDistance );
             }
