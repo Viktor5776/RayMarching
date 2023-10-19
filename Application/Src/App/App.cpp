@@ -13,10 +13,10 @@ namespace Hydro
         camera( 90.0f, 0.1f, 100.0f ),
         scene( 
         {
-            {.pos{ 0.0f, -100.5f,0.0f }, .radius = 100.0f, .materialIndex = 0 },
-            {.pos{ 0.0f,0.0f,0.0f}, .radius = 0.5f, .materialIndex = 1 },
-            {.pos{ -1.0f,0.0f,0.0f }, .radius = 0.5f, .materialIndex = 2 },
-            {.pos{ 1.0f,0.0f,0.0f}, .radius = 0.5f, .materialIndex = 3 },
+            { .id = 0, .materialIndex = 0, .active = 1 },
+			{ .id = 1, .materialIndex = 1, .active = 1 },
+			{ .id = 0, .materialIndex = 2, .active = 1 },
+			{ .id = 0, .materialIndex = 3, .active = 1 }
         }, 
         {
             {.albedo{ 0.8f, 0.8f,0.0f}, .metalRoughness = 0.0f, .isMetal = false },
@@ -30,6 +30,28 @@ namespace Hydro
         //Init Scene
         scene.lightDir = { -1.0f,-1.0f,-1.0f };
         scene.ambient = 0.2f;
+
+        scene.objects[0].data[0] = 0.0f;
+        scene.objects[0].data[1] = -100.5f;
+        scene.objects[0].data[2] = 0.0f;
+        scene.objects[0].data[3] = 100.0f;
+
+        scene.objects[1].data[0] = 0.0f;
+        scene.objects[1].data[1] = 1.0f;
+        scene.objects[1].data[2] = 0.0f;
+        scene.objects[1].data[3] = 0.5f;
+        scene.objects[1].data[4] = 0.5f;
+        scene.objects[1].data[5] = 0.5f;
+
+        scene.objects[2].data[0] = -1.0f;
+        scene.objects[2].data[1] = 0.0f;
+        scene.objects[2].data[2] = 0.0f;
+        scene.objects[2].data[3] = 0.5f;
+
+        scene.objects[3].data[0] = 1.0f;
+        scene.objects[3].data[1] = 0.0f;
+        scene.objects[3].data[2] = 0.0f;
+        scene.objects[3].data[3] = 0.5f;
 	}
 
 	App::~App()

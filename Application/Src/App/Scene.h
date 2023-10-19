@@ -6,25 +6,26 @@
 
 using namespace Hydro;
 
-struct Sphere
+struct Object
 {
-    Vec3F pos = Vec3F( 0.0f );
-	float radius = 0.0f;
+    int id = 0;
     int materialIndex = 0;
-    Vec3I padding;
+    int active = 0;
+    int padding;
+    float data[16];
 
-	void SpawnControlWindow( int id, int materialCount )
-	{
-		using namespace std::string_literals;
+    void SpawnControlWindow( int id, int materialCount )
+    {
+        using namespace std::string_literals;
 
-		ImGui::Text( "Position" );
-		ImGui::DragFloat3( "pos", &pos.x, 0.1f );
-		ImGui::Text( "Radius" );
-		ImGui::DragFloat( "radius", &radius, 0.1f );
+        ImGui::Text( "Position" );
+        ImGui::DragFloat3( "pos", &data[0], 0.1f);
+        ImGui::Text( "Radius" );
+        ImGui::DragFloat( "radius", &data[3], 0.1f);
         ImGui::Text( "Material" );
-		ImGui::DragInt( "material",&materialIndex,0.1f,0,materialCount-1 );
-		ImGui::Separator();
-	}
+        ImGui::DragInt( "material", &materialIndex, 0.1f, 0, materialCount - 1 );
+        ImGui::Separator();
+    }
 };
 
 struct Material
@@ -65,21 +66,20 @@ struct Scene
     int objectCount = 0;
     int materialCount = 0;
     Vec2I padding;
-	Sphere spheres[MAX_OBJECTS];
+	Object objects[MAX_OBJECTS];
     Material materials[MAX_OBJECTS];
     
     
-
     Scene() = default;
 
-    Scene( std::vector<Sphere> startSpheres, std::vector<Material> startMaterials )
+    Scene( std::vector<Object> startObjects, std::vector<Material> startMaterials )
         :
-        objectCount( (int)startSpheres.size() ),
+        objectCount( (int)startObjects.size() ),
         materialCount( (int)startMaterials.size() )
     {
         for( int i = 0; i < objectCount; i++ )
 		{
-			spheres[i] = startSpheres[i];
+			objects[i] = startObjects[i];
 		}
 
         for( int i = 0; i < materialCount; i++ )
@@ -115,11 +115,13 @@ struct Scene
             if( ImGui::Selectable( "Add Object" ) )
             {
                 objectCount = ++objectCount > MAX_OBJECTS ? MAX_OBJECTS : objectCount;
+                objects[objectCount - 1].active = 1;
                 comboBoxIndexObject = objectCount-1;
             }
             if( ImGui::Selectable( "Remove Object") )
 		    {
                 objectCount = --objectCount < 0 ? 0 : objectCount;
+                objects[objectCount].active = 0;
 			}
 
 
@@ -127,7 +129,7 @@ struct Scene
         }
         if( comboBoxIndexObject.has_value() )
         {
-            spheres[comboBoxIndexObject.value()].SpawnControlWindow( comboBoxIndexObject.value(), materialCount );
+            objects[comboBoxIndexObject.value()].SpawnControlWindow( comboBoxIndexObject.value(), materialCount );
         }
         ImGui::NewLine();
         ImGui::Text( "Materials" );
