@@ -8,22 +8,22 @@ using namespace Hydro;
 
 struct Object
 {
-    int id;
+    int id = 0;
     int materialIndex = 0;
-    int active;
-    int propertys[15];
+    int active = 0;
+    int padding;
+    float data[16];
 
-
-    void SpawnControlWindow( int id,int materialCount )
+    void SpawnControlWindow( int id, int materialCount )
     {
         using namespace std::string_literals;
 
         ImGui::Text( "Position" );
-        ImGui::DragFloat3( "pos", (float*)(propertys[0]),0.1f);
+        ImGui::DragFloat3( "pos", &data[0], 0.1f);
         ImGui::Text( "Radius" );
-        ImGui::DragFloat( "radius",(float*)propertys[3],0.1f);
+        ImGui::DragFloat( "radius", &data[3], 0.1f);
         ImGui::Text( "Material" );
-        ImGui::DragInt( "material",&materialIndex,0.1f,0,materialCount - 1 );
+        ImGui::DragInt( "material", &materialIndex, 0.1f, 0, materialCount - 1 );
         ImGui::Separator();
     }
 };
@@ -70,7 +70,6 @@ struct Scene
     Material materials[MAX_OBJECTS];
     
     
-
     Scene() = default;
 
     Scene( std::vector<Object> startObjects, std::vector<Material> startMaterials )
@@ -116,11 +115,13 @@ struct Scene
             if( ImGui::Selectable( "Add Object" ) )
             {
                 objectCount = ++objectCount > MAX_OBJECTS ? MAX_OBJECTS : objectCount;
+                objects[objectCount - 1].active = 1;
                 comboBoxIndexObject = objectCount-1;
             }
             if( ImGui::Selectable( "Remove Object") )
 		    {
                 objectCount = --objectCount < 0 ? 0 : objectCount;
+                objects[objectCount].active = 0;
 			}
 
 
