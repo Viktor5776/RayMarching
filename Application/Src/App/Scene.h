@@ -98,30 +98,72 @@ struct Object
 
 struct Material
 {
-    Vec3F albedo;
-    
-    //Option
-    float metalRoughness = 0.0f;
-    int isMetal = 0;
-
+    int id = 0;
     Vec3I padding;
+    float data[16];
 
     void SpawnControlWindow( int id )
     {
         using namespace std::string_literals;
 
-        ImGui::Text( "Albedo" );
-        ImGui::ColorEdit3( "Albedo",&albedo.x );
+        ImGui::Text( "Material Type" );
+        auto preview = "Diffuse"s;
 
-        bool isMetalBool = false;
-        if( isMetal == 1 )
-			isMetalBool = true;
-        ImGui::Checkbox( "Metal",&isMetalBool );
-        isMetal = isMetalBool ? 1 : 0;
+        switch( this->id )
+        {
+			case 0:
+				preview = "Diffuse"s;
+				break;
+			case 1:
+				preview = "Metal"s;
+				break;
+            case 2:
+                preview = "Dielectric"s;
+                break;
+		}
 
-        ImGui::Text( "Metal Roughness" );
-		ImGui::DragFloat( "metalRoughness",&metalRoughness,0.02f,0.0f,1.0f );
-        ImGui::Separator();
+        if( ImGui::BeginCombo( "Types",preview.c_str() ) )
+        {
+            if( ImGui::Selectable( "Diffuse",this->id == 0 ) )
+            {
+                this->id = 0;
+            }
+            if( ImGui::Selectable( "Metal",this->id == 1 ) )
+            {
+				this->id = 1;
+			}
+            if( ImGui::Selectable( "Dielectric",this->id == 2 ) )
+            {
+                this->id = 2;
+            }
+            ImGui::EndCombo();
+        }
+
+        switch( this->id )
+        {
+            case 0:
+            {
+                ImGui::Text( "Albedo" );
+				ImGui::ColorEdit3( "Albedo",&data[0] );
+				ImGui::Separator();
+				break;
+            }
+            case 1:
+            {
+                ImGui::Text( "Albedo" );
+                ImGui::ColorEdit3( "Albedo",&data[0] );
+                ImGui::Text( "Metal Roughness" );
+                ImGui::DragFloat( "metalRoughness",&data[3],0.02f,0.0f,1.0f );
+                ImGui::Separator();
+                break;
+            }
+            case 2:
+            {
+                ImGui::DragFloat("Index of Refraction",&data[0],0.02f,1.0f,10.0f );
+                break;
+            }
+
+        }
     }
 };
 

@@ -71,6 +71,14 @@ float3 reflect( float3 v, float3 n )
     return v - 2.0f * dot( v, n ) * n;
 }
 
+float3 refract( float3 uv, float3 n, float etai_over_etat)
+{
+    float cos_theta = min(dot(-uv, n), 1.0);
+    float3 r_out_perp = etai_over_etat * (uv + cos_theta * n);
+    float3 r_out_parallel = -sqrt(abs(1.0 - length(r_out_perp) * length(r_out_perp))) * n;
+    return r_out_perp + r_out_parallel;
+}
+
 //Ray marcher
 struct Ray
 {
@@ -152,16 +160,14 @@ Torus TorusFromObject( Object obj )
 
 struct Material
 {
-    float3 albedo;
+    int id;
     
     //Options
-    float metalRoughness;
-    int isMetal;
-    int3 padding;
+    float4 data[4];
     
     bool scatter( inout Ray ray_in, inout HitPayload hit, inout float3 attenuation, inout Ray scattered, inout uint seed )
     {
-        if( isMetal == 0)
+        if( id == 0)
         {
             float3 scatter_direction = hit.WorldNormal + Random::random_unit_vector( seed );
             
@@ -171,20 +177,35 @@ struct Material
             scattered.origin = hit.WorldPosition + scatter_direction * 0.001f;
             scattered.dir = scatter_direction;
             
-            attenuation = albedo;
+            attenuation = data[0].xyz;
         
             return true;
         }
         
-        if( isMetal == 1)
+        if( id == 1)
         {
             float3 reflected = reflect( normalize( ray_in.dir ), hit.WorldNormal );
             scattered.origin = hit.WorldPosition + reflected * 0.001f;
-            scattered.dir = reflected + metalRoughness * Random::random_unit_vector( seed );
+            scattered.dir = reflected + data[0].w * Random::random_unit_vector( seed );
             
-            attenuation = albedo;
+            attenuation = data[0].xyz;
             
             return (dot( scattered.dir, hit.WorldNormal ) > 0.0f);
+        }
+        
+        if( id == 2 )
+        {
+            attenuation = float3(1.0, 1.0, 1.0);
+            double refraction_ratio = hit.HitDistance < 0.0f ? (1.0 / data[0].x) : data[0].x;
+
+            float3 unit_direction = normalize(ray_in.dir);
+            float3 refracted = refract(unit_direction, hit.WorldNormal, refraction_ratio);
+
+            Ray newRay;
+            newRay.origin = hit.WorldPosition + refracted * 0.001f;
+            newRay.dir = refracted;
+            scattered = newRay;
+            return true;
         }
         
         return false;
@@ -322,7 +343,9 @@ HitPayload MarchRay( Ray ray, int maxIterations, float surfaceDistance, float ma
             float yDistance = signedDistanceScene( ray.origin + float3( 0, epsilon, 0 ) ).distance;
             float zDistance = signedDistanceScene( ray.origin + float3( 0, 0, epsilon ) ).distance;
             hit.WorldNormal = (float3( xDistance, yDistance, zDistance ) - centerDistance) / epsilon;
-
+            hit.WorldNormal = normalize( hit.WorldNormal );
+            
+            
             return hit;
         }
 

@@ -14,15 +14,15 @@ namespace Hydro
         scene( 
         {
             { .id = 0, .materialIndex = 0, .active = 1 },
-			{ .id = 1, .materialIndex = 1, .active = 1 },
-			{ .id = 0, .materialIndex = 2, .active = 1 },
+			{ .id = 1, .materialIndex = 2, .active = 1 },
+			{ .id = 0, .materialIndex = 1, .active = 1 },
 			{ .id = 0, .materialIndex = 3, .active = 1 }
         }, 
         {
-            {.albedo{ 0.8f, 0.8f,0.0f}, .metalRoughness = 0.0f, .isMetal = false },
-            {.albedo{ 0.7f, 0.3f,0.3f}, .metalRoughness = 0.0f, .isMetal = false },
-            {.albedo{ 0.8f, 0.8f,0.8f}, .metalRoughness = 0.3f, .isMetal = true  },
-            {.albedo{ 0.8f, 0.6f,0.2f}, .metalRoughness = 1.0f, .isMetal = true  },
+            { .id = 0 },
+            { .id = 2 },
+            { .id = 1 },
+            { .id = 1 },
         })
 	{
         comboBoxIndexObject = 0;
@@ -30,6 +30,23 @@ namespace Hydro
         //Init Scene
         scene.lightDir = { -1.0f,-1.0f,-1.0f };
         scene.ambient = 0.2f;
+
+        scene.materials[0].data[0] = 0.8f;
+        scene.materials[0].data[1] = 0.8f;
+        scene.materials[0].data[2] = 0.0f;
+
+        scene.materials[1].data[0] = 1.5f;
+
+        scene.materials[2].data[0] = 0.8f;
+        scene.materials[2].data[1] = 0.8f;
+        scene.materials[2].data[2] = 0.8f;
+        scene.materials[2].data[3] = 0.3f;
+
+        scene.materials[3].data[0] = 0.8f;
+        scene.materials[3].data[1] = 0.6f;
+        scene.materials[3].data[2] = 0.2f;
+        scene.materials[3].data[3] = 1.0f;
+
 
         scene.objects[0].data[0] = 0.0f;
         scene.objects[0].data[1] = -100.5f;
@@ -95,7 +112,7 @@ namespace Hydro
         ViewportWidth = (uint32_t)ImGui::GetContentRegionAvail().x;
         ViewportHeight = (uint32_t)ImGui::GetContentRegionAvail().y;
 
-        auto image = renderer.GetFinalImage();
+        Hydro::Image image = renderer.GetFinalImage();
         if( image.Active() )
         {
             ImGui::Image( image.GetData(), { (float)image.GetWidth(),(float)image.GetHeight() },
