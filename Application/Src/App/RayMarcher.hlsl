@@ -132,6 +132,24 @@ Cube CubeFromObject( Object obj )
     return cube;
 }
 
+struct Torus
+{
+    float3 posision;
+    float2 size;
+    int materialIndex;
+};
+
+Torus TorusFromObject( Object obj )
+{
+    Torus torus;
+        
+    torus.materialIndex = obj.materialIndex;
+    torus.posision = obj.data[0].xyz;
+    torus.size = float2(obj.data[0].w, obj.data[1].x);
+        
+    return torus;
+}
+
 struct Material
 {
     float3 albedo;
@@ -226,6 +244,13 @@ float signedDistanceBox( float3 p, float3 c, float3 b )
     return length( max( q, 0.0 ) ) + min( max( q.x, max( q.y, q.z ) ), 0.0 );
 }
 
+float signedDistanceTorus( float3 p, float3 center, float2 t)
+{
+    //p = p - center;
+    float2 q = float2(length(p.xz) - t.x, p.y);
+    return length(q) - t.y;
+}
+
 ObjectDistance signedDistanceScene( float3 p )
 {
     ObjectDistance result;
@@ -250,6 +275,12 @@ ObjectDistance signedDistanceScene( float3 p )
                 {
                     Cube cube = CubeFromObject( scene.objects[i] );
                     tempDistance = signedDistanceBox( p, cube.center, cube.size );
+                    break;
+                }
+                case 2:
+                {
+                    Torus torus = TorusFromObject(scene.objects[i]);
+                    tempDistance = signedDistanceTorus(p, torus.posision, torus.size);
                     break;
                 }
                 default:

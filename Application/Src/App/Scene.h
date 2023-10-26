@@ -18,13 +18,81 @@ struct Object
     {
         using namespace std::string_literals;
 
-        ImGui::Text( "Position" );
-        ImGui::DragFloat3( "pos", &data[0], 0.1f);
-        ImGui::Text( "Radius" );
-        ImGui::DragFloat( "radius", &data[3], 0.1f);
-        ImGui::Text( "Material" );
-        ImGui::DragInt( "material", &materialIndex, 0.1f, 0, materialCount - 1 );
-        ImGui::Separator();
+        //Give options for object type
+        ImGui::Text( "Object Type" );
+        auto preview = "Sphere"s;
+
+        switch( this->id )
+        {
+            case 0:
+                preview = "Sphere"s;
+				break;
+            case 1:
+                preview = "Cube"s;
+                break;
+            case 2:
+                preview = "Torus"s;
+                break;
+        }
+
+        if( ImGui::BeginCombo( "Type",preview.c_str() ) )
+        {
+            if( ImGui::Selectable( "Sphere",this->id == 0 ) )
+            {
+				this->id = 0;
+			}
+            if( ImGui::Selectable( "Cube",this->id == 1 ) )
+            {
+				this->id = 1;
+			}
+            if( ImGui::Selectable( "Torus",this->id == 2 ) )
+            {
+				this->id = 2;
+			}
+			ImGui::EndCombo();
+		}
+
+        switch( this->id )
+        {
+            case 0:
+            {
+                ImGui::Text( "Position" );
+                ImGui::DragFloat3( "pos",&data[0],0.1f );
+                ImGui::Text( "Radius" );
+                ImGui::DragFloat( "radius",&data[3],0.1f );
+                ImGui::Text( "Material" );
+                ImGui::DragInt( "material",&materialIndex,0.1f,0,materialCount - 1 );
+                ImGui::Separator();
+				break;
+            }
+
+            case 1:
+            {
+                ImGui::Text( "Position" );
+                ImGui::DragFloat3( "pos",&data[0],0.1f );
+                ImGui::Text( "Size" );
+                ImGui::DragFloat3( "size",&data[3],0.1f );
+                ImGui::Text( "Material" );
+                ImGui::DragInt( "material",&materialIndex,0.1f,0,materialCount - 1 );
+                ImGui::Separator();
+                break;
+            }
+
+            case 2:
+            {
+                ImGui::Text( "Position" );
+                ImGui::DragFloat3( "pos",&data[0],0.1f );
+                ImGui::Text( "Radius" );
+                ImGui::DragFloat( "radius",&data[3],0.1f );
+                ImGui::Text( "Inner Radius" );
+                ImGui::DragFloat( "inner radius",&data[4],0.1f );
+                ImGui::Text( "Material" );
+                ImGui::DragInt( "material",&materialIndex,0.1f,0,materialCount - 1 );
+                ImGui::Separator();
+                break;
+            }
+        }
+        
     }
 };
 
