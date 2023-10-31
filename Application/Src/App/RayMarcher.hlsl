@@ -196,14 +196,30 @@ struct Material
         if( id == 2 )
         {
             attenuation = float3(1.0, 1.0, 1.0);
-            double refraction_ratio = hit.HitDistance < 0.0f ? (1.0 / data[0].x) : data[0].x;
+            double refraction_ratio = hit.HitDistance > 0.0f ? (1.0 / data[0].x) : data[0].x;
 
             float3 unit_direction = normalize(ray_in.dir);
-            float3 refracted = refract(unit_direction, hit.WorldNormal, refraction_ratio);
+            
+            float cos_theta = min( dot( -unit_direction, hit.WorldNormal ), 1.0 );
+            float sin_theta = sqrt( 1.0 - cos_theta * cos_theta );
 
+            bool cannot_refract = refraction_ratio * sin_theta > 1.0;
+            float3 direction;
+
+            float r0 = (1 - refraction_ratio) / (1 + refraction_ratio);
+            r0 = r0 * r0;
+            float r1 = r0 + (1 - r0) * pow( (1 - cos_theta), 5 );
+            
+            if ( cannot_refract || r1 > Random::RandomFloat( seed ) )
+                direction = reflect( unit_direction, hit.WorldNormal );
+            else
+                direction = refract( unit_direction, hit.WorldNormal, refraction_ratio );
+
+            
+            
             Ray newRay;
-            newRay.origin = hit.WorldPosition + refracted * 0.001f;
-            newRay.dir = refracted;
+            newRay.origin = hit.WorldPosition + direction * 0.001f;
+            newRay.dir = direction;
             scattered = newRay;
             return true;
         }
@@ -267,12 +283,12 @@ float signedDistanceBox( float3 p, float3 c, float3 b )
 
 float signedDistanceTorus( float3 p, float3 center, float2 t)
 {
-    //p = p - center;
+    p = p - center;
     float2 q = float2(length(p.xz) - t.x, p.y);
     return length(q) - t.y;
 }
 
-ObjectDistance signedDistanceScene( float3 p )
+ObjectDistance signedDistanceScene( float3 p, int objectIndex = -1 )
 {
     ObjectDistance result;
     result.distance = 10000.0f;
@@ -280,7 +296,7 @@ ObjectDistance signedDistanceScene( float3 p )
     
     for ( int i = 0; i < scene.objectCount; i++ )
     {
-        if ( scene.objects[i].active > 0.0f )
+        if ( scene.objects[i].active > 0.0f && objectIndex != i)
         {
             float tempDistance = 10000.0f;
             
@@ -321,13 +337,13 @@ ObjectDistance signedDistanceScene( float3 p )
     return result;
 }
 
-HitPayload MarchRay( Ray ray, int maxIterations, float surfaceDistance, float maxDistance )
+HitPayload MarchRay( Ray ray, int maxIterations, float surfaceDistance, float maxDistance, int currentObject = -1)
 {
     float3 origin = ray.origin;
     
     for ( int i = 0; i < maxIterations; i++ )
     {
-        ObjectDistance d = signedDistanceScene( ray.origin );
+        ObjectDistance d = signedDistanceScene( ray.origin, currentObject );
         if ( d.distance < surfaceDistance )
         {
             HitPayload hit;
@@ -378,7 +394,7 @@ namespace RayColor
         return float3( 0, 0, 0 );
     }
 
-    float3 RayColor2( inout uint seed, Ray ray, uint maxIterations, float minDistance, float maxDistance )
+    float3 RayColor2( inout uint seed, Ray ray, uint maxIterations, float minDistance, float maxDistance, int lastHitIndex )
     {
         uint width, height;
         Result.GetDimensions( width, height );
@@ -387,7 +403,7 @@ namespace RayColor
         float2 delta = float2( Random::RandomFloat( seed ), Random::RandomFloat( seed ) ) / float2( width, height );
         ray.dir += float3( delta, 0.0f );
         
-        HitPayload hit = MarchRay( ray, maxIterations, minDistance, maxDistance );
+        HitPayload hit = MarchRay( ray, maxIterations, minDistance, maxDistance, lastHitIndex );
     
         if ( hit.HitDistance > 0.0f )
         {
@@ -395,6 +411,7 @@ namespace RayColor
             float3 attenuation;
             if ( scene.materials[scene.objects[hit.ObjectIndex].materialIndex].scatter( ray, hit, attenuation, scattered, seed ) )
             {
+                
                 return attenuation * RayColor1( seed, scattered, maxIterations, minDistance, maxDistance );
             }
             else
@@ -410,7 +427,7 @@ namespace RayColor
         return color.xyz;
     }
 
-    float3 RayColor3( inout uint seed, Ray ray, uint maxIterations, float minDistance, float maxDistance )
+    float3 RayColor3( inout uint seed, Ray ray, uint maxIterations, float minDistance, float maxDistance, int lastHitIndex )
     {
         uint width, height;
         Result.GetDimensions( width, height );
@@ -419,7 +436,7 @@ namespace RayColor
         float2 delta = float2( Random::RandomFloat( seed ), Random::RandomFloat( seed ) ) / float2( width, height );
         ray.dir += float3( delta, 0.0f );
         
-        HitPayload hit = MarchRay( ray, maxIterations, minDistance, maxDistance );
+        HitPayload hit = MarchRay( ray, maxIterations, minDistance, maxDistance, lastHitIndex );
     
         if ( hit.HitDistance > 0.0f )
         {
@@ -427,7 +444,7 @@ namespace RayColor
             float3 attenuation;
             if ( scene.materials[scene.objects[hit.ObjectIndex].materialIndex].scatter( ray, hit, attenuation, scattered, seed ) )
             {
-                return attenuation * RayColor2( seed, scattered, maxIterations, minDistance, maxDistance );
+                return attenuation * RayColor2( seed, scattered, maxIterations, minDistance, maxDistance, hit.ObjectIndex );
             }
             else
             {
@@ -442,7 +459,7 @@ namespace RayColor
         return color.xyz;
     }
     
-    float3 RayColor4( inout uint seed, Ray ray, uint maxIterations, float minDistance, float maxDistance )
+    float3 RayColor4( inout uint seed, Ray ray, uint maxIterations, float minDistance, float maxDistance, int lastHitIndex )
     {
         uint width, height;
         Result.GetDimensions( width, height );
@@ -451,7 +468,7 @@ namespace RayColor
         float2 delta = float2( Random::RandomFloat( seed ), Random::RandomFloat( seed ) ) / float2( width, height );
         ray.dir += float3( delta, 0.0f );
         
-        HitPayload hit = MarchRay( ray, maxIterations, minDistance, maxDistance );
+        HitPayload hit = MarchRay( ray, maxIterations, minDistance, maxDistance, lastHitIndex );
     
         if ( hit.HitDistance > 0.0f )
         {
@@ -459,7 +476,7 @@ namespace RayColor
             float3 attenuation;
             if ( scene.materials[scene.objects[hit.ObjectIndex].materialIndex].scatter( ray, hit, attenuation, scattered, seed ) )
             {
-                return attenuation * RayColor3( seed, scattered, maxIterations, minDistance, maxDistance );
+                return attenuation * RayColor3( seed, scattered, maxIterations, minDistance, maxDistance, hit.ObjectIndex );
             }
             else
             {
@@ -474,7 +491,7 @@ namespace RayColor
         return color.xyz;
     }
     
-    float3 RayColor5( inout uint seed, Ray ray, uint maxIterations, float minDistance, float maxDistance )
+    float3 RayColor5( inout uint seed, Ray ray, uint maxIterations, float minDistance, float maxDistance, int lastHitIndex )
     {
         uint width, height;
         Result.GetDimensions( width, height );
@@ -483,7 +500,7 @@ namespace RayColor
         float2 delta = float2( Random::RandomFloat( seed ), Random::RandomFloat( seed ) ) / float2( width, height );
         ray.dir += float3( delta, 0.0f );
         
-        HitPayload hit = MarchRay( ray, maxIterations, minDistance, maxDistance );
+        HitPayload hit = MarchRay( ray, maxIterations, minDistance, maxDistance, lastHitIndex );
     
         if ( hit.HitDistance > 0.0f )
         {
@@ -491,7 +508,7 @@ namespace RayColor
             float3 attenuation;
             if ( scene.materials[scene.objects[hit.ObjectIndex].materialIndex].scatter( ray, hit, attenuation, scattered, seed ) )
             {
-                return attenuation * RayColor4( seed, scattered, maxIterations, minDistance, maxDistance );
+                return attenuation * RayColor4( seed, scattered, maxIterations, minDistance, maxDistance, hit.ObjectIndex );
             }
             else
             {
@@ -506,7 +523,7 @@ namespace RayColor
         return color.xyz;
     }
     
-    float3 RayColor6( inout uint seed, Ray ray, uint maxIterations, float minDistance, float maxDistance )
+    float3 RayColor6( inout uint seed, Ray ray, uint maxIterations, float minDistance, float maxDistance, int lastHitIndex )
     {
         uint width, height;
         Result.GetDimensions( width, height );
@@ -515,7 +532,7 @@ namespace RayColor
         float2 delta = float2( Random::RandomFloat( seed ), Random::RandomFloat( seed ) ) / float2( width, height );
         ray.dir += float3( delta, 0.0f );
         
-        HitPayload hit = MarchRay( ray, maxIterations, minDistance, maxDistance );
+        HitPayload hit = MarchRay( ray, maxIterations, minDistance, maxDistance, lastHitIndex );
     
         if ( hit.HitDistance > 0.0f )
         {
@@ -523,7 +540,7 @@ namespace RayColor
             float3 attenuation;
             if ( scene.materials[scene.objects[hit.ObjectIndex].materialIndex].scatter( ray, hit, attenuation, scattered, seed ) )
             {
-                return attenuation * RayColor5( seed, scattered, maxIterations, minDistance, maxDistance );
+                return attenuation * RayColor5( seed, scattered, maxIterations, minDistance, maxDistance, hit.ObjectIndex );
             }
             else
             {
@@ -538,7 +555,7 @@ namespace RayColor
         return color.xyz;
     }
     
-    float3 RayColor7( inout uint seed, Ray ray, uint maxIterations, float minDistance, float maxDistance )
+    float3 RayColor7( inout uint seed, Ray ray, uint maxIterations, float minDistance, float maxDistance, int lastHitIndex )
     {
         uint width, height;
         Result.GetDimensions( width, height );
@@ -547,7 +564,7 @@ namespace RayColor
         float2 delta = float2( Random::RandomFloat( seed ), Random::RandomFloat( seed ) ) / float2( width, height );
         ray.dir += float3( delta, 0.0f );
         
-        HitPayload hit = MarchRay( ray, maxIterations, minDistance, maxDistance );
+        HitPayload hit = MarchRay( ray, maxIterations, minDistance, maxDistance, lastHitIndex );
     
         if ( hit.HitDistance > 0.0f )
         {
@@ -555,7 +572,7 @@ namespace RayColor
             float3 attenuation;
             if ( scene.materials[scene.objects[hit.ObjectIndex].materialIndex].scatter( ray, hit, attenuation, scattered, seed ) )
             {
-                return attenuation * RayColor6( seed, scattered, maxIterations, minDistance, maxDistance );
+                return attenuation * RayColor6( seed, scattered, maxIterations, minDistance, maxDistance, hit.ObjectIndex );
             }
             else
             {
@@ -570,7 +587,7 @@ namespace RayColor
         return color.xyz;
     }
     
-    float3 RayColor8( inout uint seed, Ray ray, uint maxIterations, float minDistance, float maxDistance )
+    float3 RayColor8( inout uint seed, Ray ray, uint maxIterations, float minDistance, float maxDistance, int lastHitIndex )
     {
         uint width, height;
         Result.GetDimensions( width, height );
@@ -579,7 +596,7 @@ namespace RayColor
         float2 delta = float2( Random::RandomFloat( seed ), Random::RandomFloat( seed ) ) / float2( width, height );
         ray.dir += float3( delta, 0.0f );
         
-        HitPayload hit = MarchRay( ray, maxIterations, minDistance, maxDistance );
+        HitPayload hit = MarchRay( ray, maxIterations, minDistance, maxDistance, lastHitIndex );
     
         if ( hit.HitDistance > 0.0f )
         {
@@ -587,7 +604,7 @@ namespace RayColor
             float3 attenuation;
             if ( scene.materials[scene.objects[hit.ObjectIndex].materialIndex].scatter( ray, hit, attenuation, scattered, seed ) )
             {
-                return attenuation * RayColor7( seed, scattered, maxIterations, minDistance, maxDistance );
+                return attenuation * RayColor7( seed, scattered, maxIterations, minDistance, maxDistance, hit.ObjectIndex );
             }
             else
             {
@@ -602,7 +619,7 @@ namespace RayColor
         return color.xyz;
     }
     
-    float3 RayColor9( inout uint seed, Ray ray, uint maxIterations, float minDistance, float maxDistance )
+    float3 RayColor9( inout uint seed, Ray ray, uint maxIterations, float minDistance, float maxDistance, int lastHitIndex )
     {
         uint width, height;
         Result.GetDimensions( width, height );
@@ -611,7 +628,7 @@ namespace RayColor
         float2 delta = float2( Random::RandomFloat( seed ), Random::RandomFloat( seed ) ) / float2( width, height );
         ray.dir += float3( delta, 0.0f );
         
-        HitPayload hit = MarchRay( ray, maxIterations, minDistance, maxDistance );
+        HitPayload hit = MarchRay( ray, maxIterations, minDistance, maxDistance, lastHitIndex );
     
         if ( hit.HitDistance > 0.0f )
         {
@@ -619,7 +636,7 @@ namespace RayColor
             float3 attenuation;
             if ( scene.materials[scene.objects[hit.ObjectIndex].materialIndex].scatter( ray, hit, attenuation, scattered, seed ) )
             {
-                return attenuation * RayColor8( seed, scattered, maxIterations, minDistance, maxDistance );
+                return attenuation * RayColor8( seed, scattered, maxIterations, minDistance, maxDistance, hit.ObjectIndex );
             }
             else
             {
@@ -651,7 +668,7 @@ namespace RayColor
             float3 attenuation;
             if( scene.materials[scene.objects[hit.ObjectIndex].materialIndex].scatter( ray, hit, attenuation, scattered, seed ) )
             {
-                return attenuation * RayColor9( seed, scattered, maxIterations, minDistance, maxDistance );
+                return attenuation * RayColor9( seed, scattered, maxIterations, minDistance, maxDistance, hit.ObjectIndex );
             }
             else
             {
