@@ -6,6 +6,8 @@
 #include "Camera.h"
 #include "Scene.h"
 #include <optional>
+#include <vector>
+#include <functional>
 
 namespace Hydro
 {
@@ -26,6 +28,9 @@ namespace Hydro
 		Renderer renderer;
 		Camera camera;
 		uint32_t ViewportWidth = 0, ViewportHeight = 0;
+
+		int currentScene = 3;
+		std::vector<std::function<Scene()>> scenes;
 
 		Scene scene;
 		std::optional<int> comboBoxIndexObject;

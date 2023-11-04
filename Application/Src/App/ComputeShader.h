@@ -14,6 +14,7 @@ public:
 	Image& GetImage() { return image; }
 	void OnResize( int width, int height );
 	void Dispatch( const Camera& camera, const Scene& scene, int renderIterations );
+	void SetSkybox( const std::string& path );
 private:
 	Graphics& gfx;
 	Image image;

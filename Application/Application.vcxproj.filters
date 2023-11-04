@@ -97,6 +97,9 @@
     <Image Include="Src\App\Textures\Skybox.bmp">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="Src\App\Textures\NoSkybox.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Src\App\RayMarcher.hlsl" />

@@ -189,6 +189,7 @@
     <ResourceCompile Include="Src\Win\Resource\Application.rc" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="Src\App\Textures\NoSkybox.bmp" />
     <Image Include="Src\App\Textures\Skybox.bmp" />
     <Image Include="Src\Win\Resource\HydroDirectX.ico" />
   </ItemGroup>

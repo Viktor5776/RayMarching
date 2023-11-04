@@ -16,6 +16,7 @@ public:
 	void OnResize( int width, int height );
 	Image& GetFinalImage() { return rayMarcherShader.GetImage(); }
 	int& GetRenderIterations() { return renderIterations; }
+	void SetSkybox( const std::string& path ) { rayMarcherShader.SetSkybox( path ); }
 private:
 	int renderIterations = 1;
 	ComputeShader rayMarcherShader;

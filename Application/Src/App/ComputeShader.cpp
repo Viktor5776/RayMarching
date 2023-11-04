@@ -14,45 +14,7 @@ ComputeShader::ComputeShader( Graphics& gfx, const std::wstring& path )
 	assert( SUCCEEDED( hr ) );
 
 	//Load skybox
-	Texture skybox = Texture( "Src/App/Textures/Skybox.bmp" );
-	
-	D3D11_TEXTURE2D_DESC textureDesc = {};
-	textureDesc.Width = skybox.GetWidth();
-	textureDesc.Height = skybox.GetHeight();
-	textureDesc.MipLevels = 1;
-	textureDesc.ArraySize = 1;
-	textureDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-	textureDesc.SampleDesc.Count = 1;
-	textureDesc.Usage = D3D11_USAGE_IMMUTABLE;
-	textureDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
-	textureDesc.CPUAccessFlags = 0;
-	textureDesc.MiscFlags = 0;
-
-	D3D11_SUBRESOURCE_DATA subresourceData = {};
-	subresourceData.pSysMem = (void*)skybox.GetData();
-	subresourceData.SysMemPitch = skybox.GetWidth() * 4;
-
-	hr = gfx.GetDevice()->CreateTexture2D( &textureDesc, &subresourceData, &pSkyboxTexture );
-	assert( SUCCEEDED( hr ) );
-
-	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
-	srvDesc.Format = textureDesc.Format;
-	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
-	srvDesc.Texture2D.MipLevels = 1;
-
-	hr = gfx.GetDevice()->CreateShaderResourceView( pSkyboxTexture.Get(), &srvDesc, &pSkyboxSRV );
-	assert( SUCCEEDED( hr ) );
-
-	D3D11_SAMPLER_DESC samplerDesc = {};
-	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
-	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
-	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
-	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
-
-	hr = gfx.GetDevice()->CreateSamplerState( &samplerDesc, &pSkyboxSampler );
-	assert( SUCCEEDED( hr ) );
-
-	gfx.GetDeviceContext()->CSSetSamplers( 0, 1, pSkyboxSampler.GetAddressOf() );
+	SetSkybox( "Src/App/Textures/Skybox.bmp" );
 
 	OnResize( 0, 0 );
 }
@@ -148,4 +110,47 @@ void ComputeShader::Dispatch( const Camera& camera, const Scene& scene, int rend
 
 	//Copy output texture to image
 	image.SetTexture( pOutputTexture.Get() );
+}
+
+void ComputeShader::SetSkybox( const std::string& path )
+{
+	Texture skybox = Texture( path );
+
+	D3D11_TEXTURE2D_DESC textureDesc = {};
+	textureDesc.Width = skybox.GetWidth();
+	textureDesc.Height = skybox.GetHeight();
+	textureDesc.MipLevels = 1;
+	textureDesc.ArraySize = 1;
+	textureDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	textureDesc.SampleDesc.Count = 1;
+	textureDesc.Usage = D3D11_USAGE_IMMUTABLE;
+	textureDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+	textureDesc.CPUAccessFlags = 0;
+	textureDesc.MiscFlags = 0;
+
+	D3D11_SUBRESOURCE_DATA subresourceData = {};
+	subresourceData.pSysMem = (void*)skybox.GetData();
+	subresourceData.SysMemPitch = skybox.GetWidth() * 4;
+
+	auto hr = gfx.GetDevice()->CreateTexture2D( &textureDesc, &subresourceData, &pSkyboxTexture );
+	assert( SUCCEEDED( hr ) );
+
+	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+	srvDesc.Format = textureDesc.Format;
+	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+	srvDesc.Texture2D.MipLevels = 1;
+
+	hr = gfx.GetDevice()->CreateShaderResourceView( pSkyboxTexture.Get(), &srvDesc, &pSkyboxSRV );
+	assert( SUCCEEDED( hr ) );
+
+	D3D11_SAMPLER_DESC samplerDesc = {};
+	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+
+	hr = gfx.GetDevice()->CreateSamplerState( &samplerDesc, &pSkyboxSampler );
+	assert( SUCCEEDED( hr ) );
+
+	gfx.GetDeviceContext()->CSSetSamplers( 0, 1, pSkyboxSampler.GetAddressOf() );
 }

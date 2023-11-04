@@ -99,7 +99,7 @@ struct Object
 struct Material
 {
     int id = 0;
-    Vec3I padding;
+    Vec3F emitedLight;
     float data[16];
 
     void SpawnControlWindow( int id )
@@ -145,7 +145,6 @@ struct Material
             {
                 ImGui::Text( "Albedo" );
 				ImGui::ColorEdit3( "Albedo",&data[0] );
-				ImGui::Separator();
 				break;
             }
             case 1:
@@ -154,7 +153,6 @@ struct Material
                 ImGui::ColorEdit3( "Albedo",&data[0] );
                 ImGui::Text( "Metal Roughness" );
                 ImGui::DragFloat( "metalRoughness",&data[3],0.02f,0.0f,1.0f );
-                ImGui::Separator();
                 break;
             }
             case 2:
@@ -164,6 +162,11 @@ struct Material
             }
 
         }
+
+        ImGui::Text( "Emited Light" );
+        ImGui::ColorEdit3("Emited Light",&emitedLight.x);
+        ImGui::DragFloat("Strength",&data[15], 0.1f, 0.0f, 100.0f);
+        ImGui::Separator();
     }
 };
 
@@ -171,8 +174,6 @@ static constexpr int MAX_OBJECTS = 128;
 
 struct Scene
 {
-	Vec3F lightDir;
-	float ambient = 0.0f;
     int objectCount = 0;
     int materialCount = 0;
     Vec2I padding;
@@ -202,8 +203,6 @@ struct Scene
 	{
         using namespace std::string_literals;
         ImGui::Begin( "Scene" );
-        ImGui::SliderFloat3( "Light Direction", &lightDir.x, -1.0f, 1.0f );
-        ImGui::SliderFloat( "Ambient", &ambient, 0.0f, 1.0f );
         ImGui::NewLine();
         ImGui::Text( "Objects" );
         ImGui::Separator();
